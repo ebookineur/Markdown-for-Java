@@ -1,9 +1,23 @@
 package com.ebookineur.markdown.renderer;
 
-import java.io.IOException;
+import com.ebookineur.markdown.MarkdownRenderer;
 
-public class DefaultXHtmlRenderer extends BaseMarkdownRenderer {
-	public DefaultXHtmlRenderer(String fileName) throws IOException {
-		super(fileName);
+public class DefaultXHtmlRenderer implements MarkdownRenderer {
+	public DefaultXHtmlRenderer() {
+	}
+
+	@Override
+	public String doc_header() {
+		return null;
+	}
+
+	@Override
+	public String doc_footer() {
+		return null;
+	}
+
+	@Override
+	public String paragraph(String para) {
+		return "<p>" + para + "</p>";
 	}
 }

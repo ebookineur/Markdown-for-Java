@@ -31,13 +31,13 @@ public class TestMarkdownParser {
 			fail("bad file name:" + fileName);
 		}
 		String expectedFileName = fileName.substring(0, pos) + ".html";
-		String resultFileName = fileName + ".result";
+		String resultFileName = fileName + ".result.html";
 
-		MarkdownRenderer renderer = new DefaultXHtmlRenderer(resultFileName);
+		MarkdownRenderer renderer = new DefaultXHtmlRenderer();
 
 		MarkdownParser parser = MarkdownFactory.parser(extensions);
 
-		parser.parse(inputFile, renderer);
+		parser.parse(inputFile, new File(resultFileName), renderer);
 
 		compareFile(resultFileName, expectedFileName);
 	}
