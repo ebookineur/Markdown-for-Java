@@ -15,9 +15,10 @@ import com.ebookineur.markdown.renderer.DefaultXHtmlRenderer;
 
 public class TestMarkdownParser {
 	@Test
-	public void test01() throws Exception {
+	public void testSimple() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
 		testFile("tests/simple/test01.txt", extensions);
+		testFile("tests/simple/test02.txt", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

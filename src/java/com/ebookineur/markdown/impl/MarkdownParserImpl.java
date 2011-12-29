@@ -45,21 +45,37 @@ public class MarkdownParserImpl implements MarkdownParser {
 				return;
 			}
 			nbParas++;
-			
+
 			if (nbParas > 1) {
 				// add separator between paras
 				if (_extensions.withExtraEmptyLineAfterPara()) {
 					_output.eol();
 				}
 			}
-			
+
 			StringBuilder sb = new StringBuilder();
 
-			for (String line : para) {
+			for (int i = 0; i < para.size(); i++) {
+				String line = para.get(i);
 				if (sb.length() > 0) {
+					// separator between lines
 					sb.append("\n");
 				}
-				sb.append(line);
+				if (line.endsWith("  ") && (i < (para.size() - 1))) {
+					// the end of line is added only
+					// if the line with the ending 2 spaces is not the last 
+					// line of the paragraph
+					for(int pos = line.length() - 1 ; pos > 0 ; pos --) {
+						if (line.charAt(pos) != ' ') {
+							sb.append(line.substring(0, pos + 1));
+							sb.append(" ");
+							sb.append(renderer.linebreak());
+							break;
+						}
+					}
+				} else {
+					sb.append(line);
+				}
 			}
 
 			_output.println(renderer.paragraph(sb.toString()));

@@ -20,4 +20,9 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	public String paragraph(String para) {
 		return "<p>" + para + "</p>";
 	}
+	
+	@Override
+	public String linebreak() {
+		return "<br />";
+	}
 }
