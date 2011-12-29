@@ -1,1 +1,12 @@
 Java implementation of an extensible Markdown parser
+
+references:
+
+tests: 
+https://github.com/jgm/peg-markdown/tree/master/MarkdownTest_1.0.3
+
+redcarpet:
+https://github.com/tanoku/redcarpet
+
+sundown:
+https://github.com/tanoku/sundown
