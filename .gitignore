@@ -1,4 +1,4 @@
-.result.html
+*.result.html
 *.class
 *.dmg
 *.gz
