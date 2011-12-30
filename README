@@ -1,5 +1,7 @@
 Java implementation of an extensible Markdown parser
 
+must be compliant to the "original" Markdown implementation
+
 references:
 
 tests: 

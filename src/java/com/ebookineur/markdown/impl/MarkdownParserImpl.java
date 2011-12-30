@@ -45,6 +45,8 @@ public class MarkdownParserImpl implements MarkdownParser {
 				return;
 			}
 			nbParas++;
+			
+			para = parseSpanElements(para);
 
 			if (nbParas > 1) {
 				// add separator between paras
@@ -81,5 +83,9 @@ public class MarkdownParserImpl implements MarkdownParser {
 			_output.println(renderer.paragraph(sb.toString()));
 		}
 
+	}
+
+	private List<String> parseSpanElements(List<String> para) {
+		return para;
 	}
 }
