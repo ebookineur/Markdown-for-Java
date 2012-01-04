@@ -19,6 +19,7 @@ public class TestMarkdownParser {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
 		testFile("tests/simple/test01.txt", extensions);
 		testFile("tests/simple/test02.txt", extensions);
+		testFile("tests/simple/test03.txt", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

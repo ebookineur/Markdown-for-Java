@@ -2,13 +2,16 @@ package com.ebookineur.markdown.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ebookineur.markdown.MarkdownException;
 import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownParser;
 import com.ebookineur.markdown.MarkdownRenderer;
+import com.ebookineur.markdown.impl.ParaLinkParser.LinkInfo;
+import com.ebookineur.markdown.impl.ParaParser.ParsingCursor;
+import com.ebookineur.markdown.impl.ParaParser.Position;
 
 public class MarkdownParserImpl implements MarkdownParser {
 	private final MarkdownExtensions _extensions;
@@ -45,7 +48,7 @@ public class MarkdownParserImpl implements MarkdownParser {
 				return;
 			}
 			nbParas++;
-			
+
 			para = parseSpanElements(para);
 
 			if (nbParas > 1) {
@@ -65,9 +68,9 @@ public class MarkdownParserImpl implements MarkdownParser {
 				}
 				if (line.endsWith("  ") && (i < (para.size() - 1))) {
 					// the end of line is added only
-					// if the line with the ending 2 spaces is not the last 
+					// if the line with the ending 2 spaces is not the last
 					// line of the paragraph
-					for(int pos = line.length() - 1 ; pos > 0 ; pos --) {
+					for (int pos = line.length() - 1; pos > 0; pos--) {
 						if (line.charAt(pos) != ' ') {
 							sb.append(line.substring(0, pos + 1));
 							sb.append(" ");
@@ -86,6 +89,59 @@ public class MarkdownParserImpl implements MarkdownParser {
 	}
 
 	private List<String> parseSpanElements(List<String> para) {
-		return para;
+		ParaLinkParser p = new ParaLinkParser(para);
+		ArrayList<String> result = new ArrayList<String>();
+
+		Position p0 = p.position0();
+
+		while (true) {
+			LinkInfo link = p.findLink(p0);
+			if (link == null) {
+				p.copyFromPosition(p0, result);
+				break;
+			} else {
+				ParsingCursor cursor = p.cursor();
+				Position pStart = cursor._matchStart;
+				// we copy first up to the beginning of the match
+				p.copyFromPosition(p0, pStart, result);
+
+				// we output the link itself
+				if (link.isLinkId()) {
+					// TODO: not implemented yet
+				} else {
+					StringBuilder sb = new StringBuilder();
+					sb.append("<a href=\"");
+					// TODO: escape query parameters
+					sb.append(link.getLink());
+					sb.append("\"");
+					if (link.getTitle() != null) {
+						sb.append(" title=\"");
+						// TODO: escape title
+						sb.append(link.getTitle());
+						sb.append("\"");
+					}
+					sb.append(">");
+					sb.append(link.getLinkText());
+					sb.append("</a>");
+					if (pStart.getPosition() == 0) {
+						result.add(sb.toString());
+					} else {
+						String last = result.get(result.size() - 1);
+						String line = last + sb.toString();
+						result.remove(result.size() - 1);
+						result.add(line);
+					}
+				}
+
+				// the last char is the closing )
+				p0 = cursor._matchEnded.nextChar();
+				
+				if (p0 == null) {
+					break;
+				}
+			}
+		}
+
+		return result;
 	}
 }
