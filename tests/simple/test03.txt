@@ -1,0 +1,8 @@
+none
+
+before[link](http://www.google.com)
+
+[link](http://www.google.com)after
+
+before [link](http://www.google.com) and after
+
