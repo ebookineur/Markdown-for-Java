@@ -1,0 +1,15 @@
+[link](www.simple.com) faison simple pour commencer 
+
+another [link][id1]
+
+[id1]: http://www.google.com
+
+let's see another one [linkxxx] [id1] using the same id
+
+
+a link [linkerror] [iderror] with an error
+
+let's [kkk] [id2] continue with [link][id1] 2 links
+
+[id2]: <www.ebookineur.com>
+    (the best blog ever)
