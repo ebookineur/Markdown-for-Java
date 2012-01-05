@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+
 import com.ebookineur.markdown.MarkdownException;
 import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownParser;
@@ -113,6 +115,12 @@ public class MarkdownParserImpl implements MarkdownParser {
 				break;
 			} else {
 				ParsingCursor cursor = p.cursor();
+				if ((cursor == null) || (cursor._matchEnded == null)) {
+					for (String l : para) {
+						System.out.println(l);
+					}
+					throw new RuntimeException("pos is invalid");
+				}
 				Position pStart = cursor._matchStart;
 				// we copy first up to the beginning of the match
 				p.copyFromPosition(p0, pStart, result);
@@ -130,7 +138,8 @@ public class MarkdownParserImpl implements MarkdownParser {
 						// we copy thr line "as is"... there is most probaly
 						// an error in the file as the link is not defined
 						// TODO: warning message
-						p.copyFromPosition(pStart, cursor._matchEnded.nextChar(), result);
+						p.copyFromPosition(pStart,
+								cursor._matchEnded.nextChar(), result);
 					}
 				} else {
 					linkOutput = renderer.link(link.getLink(), link.getTitle(),

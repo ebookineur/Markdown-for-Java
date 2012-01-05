@@ -30,8 +30,10 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	public String link(String link, String title, String content) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<a href=\"");
+		if (link != null) {
 		// TODO: escape query parameters
-		sb.append(link);
+			sb.append(link);
+		}
 		sb.append("\"");
 		if (title != null) {
 			sb.append(" title=\"");

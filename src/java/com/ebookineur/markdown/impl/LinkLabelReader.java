@@ -87,10 +87,13 @@ public class LinkLabelReader {
 						break;
 
 					case 10:
-						if (c == ']') {
-							state = 11;
+						int posClosing = findMatching('[', ']', line, i);
+						if (posClosing < 0) {
+							state = 99;
 						} else {
-							linkId.append(c);
+							linkId.append(line.substring(i,posClosing));
+							i = posClosing;
+							state = 11;
 						}
 						break;
 
@@ -162,7 +165,7 @@ public class LinkLabelReader {
 					}
 				}
 
-				System.out.println("(" + line + "):state=" + state);
+				// System.out.println("(" + line + "):state=" + state);
 				if (state == 100) {
 					_linkLabels.put(linkId.toString(),
 							new LinkLabel(linkId.toString(), link.toString(),
@@ -232,6 +235,23 @@ public class LinkLabelReader {
 		} else {
 			return null;
 		}
+	}
+
+	private int findMatching(char opening, char closing, String line, int pos0) {
+		int count = 0;
+		for (int i = pos0; i < line.length(); i++) {
+			char c = line.charAt(i);
+			if (c == closing) {
+				if (count == 0) {
+					return i;
+				} else {
+					count--;
+				}
+			} else if (c == opening) {
+				count++;
+			}
+		}
+		return -1;
 	}
 
 	Map<String, LinkLabel> linkLabels() {

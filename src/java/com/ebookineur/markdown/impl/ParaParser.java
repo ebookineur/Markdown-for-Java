@@ -104,7 +104,7 @@ class ParaParser {
 
 		int pos0 = p0._position;
 
-		//System.out.println("p0=" + p0);
+		// System.out.println("p0=" + p0);
 
 		for (index = p0._index; index < _paras.size(); index++) {
 			String line = _paras.get(index).substring(pos0);
@@ -134,7 +134,7 @@ class ParaParser {
 			String line;
 
 			if (index == p1._index) {
-				//System.out.println("p0=" + p0 + ",p1=" + p1);
+				// System.out.println("p0=" + p0 + ",p1=" + p1);
 				line = _paras.get(index).substring(pos0, p1._position);
 			} else {
 				line = _paras.get(index).substring(pos0);
@@ -156,5 +156,22 @@ class ParaParser {
 			pos0 = 0;
 		}
 
+	}
+
+	protected int findMatching(char opening, char closing, String line, int pos0) {
+		int count = 0;
+		for (int i = pos0; i < line.length(); i++) {
+			char c = line.charAt(i);
+			if (c == closing) {
+				if (count == 0) {
+					return i;
+				} else {
+					count--;
+				}
+			} else if (c == opening) {
+				count++;
+			}
+		}
+		return -1;
 	}
 }

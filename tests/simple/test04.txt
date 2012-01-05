@@ -13,3 +13,7 @@ let's [kkk] [id2] continue with [link][id1] 2 links
 
 [id2]: <www.ebookineur.com>
     (the best blog ever)
+
+
+With [embedded [brackets]] [b].
+[b]: www.latete.com

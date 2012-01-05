@@ -23,6 +23,13 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test04.txt", extensions);
 	}
 
+	@Test
+	public void test103() throws Exception {
+		MarkdownExtensions extensions = MarkdownFactory.extensions();
+		testFile("tests/1.0.3/Links, inline style.text", extensions);
+		testFile("tests/1.0.3/Links, reference style.text", extensions);
+	}
+
 	private void testFile(String fileName, MarkdownExtensions extensions)
 			throws Exception {
 		File inputFile = new File(fileName);

@@ -36,10 +36,13 @@ public class ParaLinkParser extends ParaParser {
 					break;
 
 				case 1:
-					if (c == ']') {
-						state = 2;
+					int posClosing = findMatching('[', ']', line, pos);
+					if (posClosing < 0) {
+						state = 99;
 					} else {
-						linkText.append(c);
+						linkText.append(line.substring(pos,posClosing));
+						pos = posClosing;
+						state = 2;
 					}
 					break;
 
