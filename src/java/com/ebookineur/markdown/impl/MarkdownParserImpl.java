@@ -49,7 +49,7 @@ public class MarkdownParserImpl implements MarkdownParser {
 			}
 			nbParas++;
 
-			para = parseSpanElements(para);
+			para = parseSpanElements(para, renderer);
 
 			if (nbParas > 1) {
 				// add separator between paras
@@ -88,7 +88,8 @@ public class MarkdownParserImpl implements MarkdownParser {
 
 	}
 
-	private List<String> parseSpanElements(List<String> para) {
+	private List<String> parseSpanElements(List<String> para,
+			MarkdownRenderer renderer) {
 		ParaLinkParser p = new ParaLinkParser(para);
 		ArrayList<String> result = new ArrayList<String>();
 
@@ -109,25 +110,13 @@ public class MarkdownParserImpl implements MarkdownParser {
 				if (link.isLinkId()) {
 					// TODO: not implemented yet
 				} else {
-					StringBuilder sb = new StringBuilder();
-					sb.append("<a href=\"");
-					// TODO: escape query parameters
-					sb.append(link.getLink());
-					sb.append("\"");
-					if (link.getTitle() != null) {
-						sb.append(" title=\"");
-						// TODO: escape title
-						sb.append(link.getTitle());
-						sb.append("\"");
-					}
-					sb.append(">");
-					sb.append(link.getLinkText());
-					sb.append("</a>");
+					String linkOutput = renderer.link(link.getLink(),
+							link.getTitle(), link.getLinkText());
 					if (pStart.getPosition() == 0) {
-						result.add(sb.toString());
+						result.add(linkOutput);
 					} else {
 						String last = result.get(result.size() - 1);
-						String line = last + sb.toString();
+						String line = last + linkOutput;
 						result.remove(result.size() - 1);
 						result.add(line);
 					}
@@ -135,7 +124,7 @@ public class MarkdownParserImpl implements MarkdownParser {
 
 				// the last char is the closing )
 				p0 = cursor._matchEnded.nextChar();
-				
+
 				if (p0 == null) {
 					break;
 				}

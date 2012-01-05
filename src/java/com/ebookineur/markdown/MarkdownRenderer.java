@@ -12,7 +12,10 @@ public interface MarkdownRenderer {
 	String doc_footer();
 
 	String paragraph(String para);
-	
+
 	// marker for linebreak
 	String linebreak();
+
+	// marker for links
+	String link(String link, String title, String content);
 }

@@ -6,3 +6,24 @@ before[link](http://www.google.com)
 
 before [link](http://www.google.com) and after
 
+on multiple [link](http://www.google.com)
+lines
+
+on multiple
+[link](http://www.google.com) lines
+
+on multiple
+[link](http://www.google.com)
+lines
+
+on multiple
+[link](http://www.google.com)
+[link2](http://www.google.com?param)
+lines
+
+[link](http://www.google.com)[link2](http://www.google2.com)
+
+[link](http://www.google.com)after[link2](http://www.google2.com)after
+
+
+

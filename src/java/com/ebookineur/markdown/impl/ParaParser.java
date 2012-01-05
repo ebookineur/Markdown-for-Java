@@ -140,8 +140,11 @@ class ParaParser {
 				line = _paras.get(index).substring(pos0);
 			}
 			if (pos0 == 0) {
-				// if that's a new lne we append to the array
-				result.add(line);
+				// if that's a new line we append to the array
+				// excet if the line to add is empty
+				if (line.length() > 0) {
+					result.add(line);
+				}
 			} else {
 				// if started in the middle, that means that we need to
 				// append to the last line added
