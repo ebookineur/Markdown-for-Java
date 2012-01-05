@@ -1,3 +1,13 @@
 none
 
 [link1]: www.google.com "Google !"
+ [link2]: <www.google2.com> 'Google 2!'
+  [link3]: www.google3.com (Google 3!)
+
+   [link4]: www.google4.com
+
+[linkx]:
+    [linkxx]: www.google3.com (Google 3!)
+
+ [link5]: <www.yahoo.com?p=1> 
+    "Why not yahoo?"

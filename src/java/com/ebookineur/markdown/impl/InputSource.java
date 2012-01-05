@@ -9,9 +9,11 @@ import java.util.List;
 
 class InputSource {
 	private final BufferedReader _br;
+	private final List<Integer> _linenosToSkip;
 	private int _lineno;
 
-	InputSource(File input) throws IOException {
+	InputSource(File input, List<Integer> linenosToSkip) throws IOException {
+		_linenosToSkip = linenosToSkip;
 		_br = new BufferedReader(new FileReader(input));
 		_lineno = 0;
 	}
@@ -32,7 +34,14 @@ class InputSource {
 				} else {
 					return null;
 				}
-			} else if (line.trim().length() == 0) {
+			}
+			
+			// check if the linke has to be skipped
+			if (_linenosToSkip.contains(_lineno)) {
+				continue;
+			}
+
+			if (line.trim().length() == 0) {
 				// empty line
 				if (result.size() > 0) {
 					return result;

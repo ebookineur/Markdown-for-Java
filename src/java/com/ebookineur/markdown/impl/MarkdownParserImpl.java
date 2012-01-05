@@ -1,16 +1,16 @@
 package com.ebookineur.markdown.impl;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.ebookineur.markdown.MarkdownException;
 import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownParser;
 import com.ebookineur.markdown.MarkdownRenderer;
+import com.ebookineur.markdown.impl.LinkLabelReader.LinkLabel;
 import com.ebookineur.markdown.impl.ParaLinkParser.LinkInfo;
 import com.ebookineur.markdown.impl.ParaParser.ParsingCursor;
 import com.ebookineur.markdown.impl.ParaParser.Position;
@@ -18,6 +18,7 @@ import com.ebookineur.markdown.impl.ParaParser.Position;
 public class MarkdownParserImpl implements MarkdownParser {
 	private final MarkdownExtensions _extensions;
 	private Output _output;
+	private Map<String, LinkLabel> _linkLabels;
 
 	public MarkdownParserImpl(MarkdownExtensions extensions) {
 		_extensions = extensions;
@@ -26,7 +27,15 @@ public class MarkdownParserImpl implements MarkdownParser {
 	@Override
 	public void parse(File inputFile, File resultFile, MarkdownRenderer renderer) {
 		try {
-			InputSource inputSource = new InputSource(inputFile);
+			LinkLabelReader linkLabelreader = new LinkLabelReader();
+			linkLabelreader.readLinkLabels(inputFile);
+
+			_linkLabels = linkLabelreader.linkLabels();
+			List<Integer> linenosWithLinkLabels = linkLabelreader
+					.linenosWithLinkLabels();
+
+			InputSource inputSource = new InputSource(inputFile,
+					linenosWithLinkLabels);
 			_output = new Output(resultFile);
 
 			parse(inputSource, renderer);
@@ -108,12 +117,27 @@ public class MarkdownParserImpl implements MarkdownParser {
 				// we copy first up to the beginning of the match
 				p.copyFromPosition(p0, pStart, result);
 
+				String linkOutput = null;
+
 				// we output the link itself
 				if (link.isLinkId()) {
-					// TODO: not implemented yet
+					String linkId = link.getLinkId();
+					LinkLabel linkLabel = _linkLabels.get(linkId);
+					if (linkLabel != null) {
+						linkOutput = renderer.link(linkLabel.getUrl(),
+								linkLabel.getTitle(), link.getLinkText());
+					} else {
+						// we copy thr line "as is"... there is most probaly
+						// an error in the file as the link is not defined
+						// TODO: warning message
+						p.copyFromPosition(pStart, cursor._matchEnded.nextChar(), result);
+					}
 				} else {
-					String linkOutput = renderer.link(link.getLink(),
-							link.getTitle(), link.getLinkText());
+					linkOutput = renderer.link(link.getLink(), link.getTitle(),
+							link.getLinkText());
+				}
+
+				if (linkOutput != null) {
 					if (pStart.getPosition() == 0) {
 						result.add(linkOutput);
 					} else {

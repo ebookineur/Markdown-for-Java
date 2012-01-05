@@ -15,6 +15,8 @@ public class LinkLabelReader {
 
 	void readLinkLabels(File input) throws IOException {
 		BufferedReader br = null;
+		boolean checkTitleOnLine = false;
+		LinkLabel currentLinkLabel = null;
 
 		try {
 			int lineno = 0;
@@ -25,6 +27,20 @@ public class LinkLabelReader {
 					return;
 				}
 				lineno++;
+
+				if (checkTitleOnLine) {
+					// we must deal with the fact that this line may contain a
+					// title
+					String title = getTitle(line);
+					if (title != null) {
+						currentLinkLabel.setTitle(title);
+						_linenosWithLinkLabels.add(lineno);
+						continue;
+					}
+					checkTitleOnLine = false;
+					currentLinkLabel = null;
+
+				}
 
 				StringBuilder linkId = new StringBuilder();
 				StringBuilder link = new StringBuilder();
@@ -146,10 +162,18 @@ public class LinkLabelReader {
 					}
 				}
 
+				System.out.println("(" + line + "):state=" + state);
 				if (state == 100) {
 					_linkLabels.put(linkId.toString(),
 							new LinkLabel(linkId.toString(), link.toString(),
 									title.toString()));
+					_linenosWithLinkLabels.add(lineno);
+				} else if ((state == 15) || (state == 14)) {
+					// link without title ... maybe next line!
+					checkTitleOnLine = true;
+					currentLinkLabel = new LinkLabel(linkId.toString(),
+							link.toString());
+					_linkLabels.put(linkId.toString(), currentLinkLabel);
 					_linenosWithLinkLabels.add(lineno);
 				}
 			}
@@ -159,8 +183,63 @@ public class LinkLabelReader {
 		}
 	}
 
+	private String getTitle(String line) {
+		int state = 0;
+		StringBuilder title = new StringBuilder();
+
+		for (int i = 0; i < line.length() && state != 99; i++) {
+			char c = line.charAt(i);
+
+			switch (state) {
+			case 0:
+				if ((c == ' ') || (c == '\t')) {
+				} else if (c == '\"') {
+					state = 1;
+				} else if (c == '\'') {
+					state = 2;
+				} else if (c == '(') {
+					state = 3;
+				} else {
+					state = 99;
+				}
+				break;
+
+			case 1:
+				if (c == '\"') {
+					state = 100;
+				} else {
+					title.append(c);
+				}
+				break;
+			case 2:
+				if (c == '\'') {
+					state = 100;
+				} else {
+					title.append(c);
+				}
+				break;
+			case 3:
+				if (c == ')') {
+					state = 100;
+				} else {
+					title.append(c);
+				}
+				break;
+			}
+		}
+		if (state == 100) {
+			return title.toString();
+		} else {
+			return null;
+		}
+	}
+
 	Map<String, LinkLabel> linkLabels() {
 		return _linkLabels;
+	}
+
+	List<Integer> linenosWithLinkLabels() {
+		return _linenosWithLinkLabels;
 	}
 
 	class LinkLabel {
@@ -188,6 +267,10 @@ public class LinkLabelReader {
 
 		String getTitle() {
 			return _title;
+		}
+
+		void setTitle(String title) {
+			_title = title;
 		}
 	}
 
