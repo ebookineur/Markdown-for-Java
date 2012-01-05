@@ -9,9 +9,11 @@ import java.util.List;
 
 class InputSource {
 	private final BufferedReader _br;
+	private int _lineno;
 
 	InputSource(File input) throws IOException {
 		_br = new BufferedReader(new FileReader(input));
+		_lineno = 0;
 	}
 
 	void close() throws IOException {
@@ -22,6 +24,7 @@ class InputSource {
 		List<String> result = new ArrayList<String>();
 		while (true) {
 			String line = _br.readLine();
+			_lineno++;
 			if (line == null) {
 				// end of file reached
 				if (result.size() > 0) {
