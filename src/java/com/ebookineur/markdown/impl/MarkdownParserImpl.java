@@ -2,25 +2,22 @@ package com.ebookineur.markdown.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.management.RuntimeErrorException;
 
 import com.ebookineur.markdown.MarkdownException;
 import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownParser;
 import com.ebookineur.markdown.MarkdownRenderer;
-import com.ebookineur.markdown.impl.LinkLabelReader.LinkLabel;
-import com.ebookineur.markdown.impl.ParaLinkParser.LinkInfo;
-import com.ebookineur.markdown.impl.ParaParser.ParsingCursor;
-import com.ebookineur.markdown.impl.ParaParser.Position;
+import com.ebookineur.markdown.impl.scanner.FileScanner;
+import com.ebookineur.markdown.impl.scanner.Paragraph;
 
+//
+// extensions:
+//   http://michelf.com/projects/php-markdown/extra/
+//
 public class MarkdownParserImpl implements MarkdownParser {
 	private final MarkdownExtensions _extensions;
+	private FileScanner _fileScanner;
 	private Output _output;
-	private Map<String, LinkLabel> _linkLabels;
 
 	public MarkdownParserImpl(MarkdownExtensions extensions) {
 		_extensions = extensions;
@@ -29,19 +26,11 @@ public class MarkdownParserImpl implements MarkdownParser {
 	@Override
 	public void parse(File inputFile, File resultFile, MarkdownRenderer renderer) {
 		try {
-			LinkLabelReader linkLabelreader = new LinkLabelReader();
-			linkLabelreader.readLinkLabels(inputFile);
-
-			_linkLabels = linkLabelreader.linkLabels();
-			List<Integer> linenosWithLinkLabels = linkLabelreader
-					.linenosWithLinkLabels();
-
-			InputSource inputSource = new InputSource(inputFile,
-					linenosWithLinkLabels);
+			_fileScanner = new FileScanner(inputFile);
 			_output = new Output(resultFile);
 
-			parse(inputSource, renderer);
-			inputSource.close();
+			parse(renderer);
+			_fileScanner.close();
 			_output.close();
 		} catch (IOException ex) {
 			throw new MarkdownException("error processing:"
@@ -50,19 +39,18 @@ public class MarkdownParserImpl implements MarkdownParser {
 
 	}
 
-	private void parse(InputSource inputSource, MarkdownRenderer renderer)
-			throws IOException {
-		List<String> para;
+	private void parse(MarkdownRenderer renderer) throws IOException {
+		Paragraph para;
 		int nbParas = 0;
 
 		while (true) {
-			para = inputSource.getPara();
+			para = _fileScanner.getPara();
 			if (para == null) {
 				return;
 			}
 			nbParas++;
 
-			para = parseSpanElements(para, renderer);
+			//para = parseSpanElements(para, renderer);
 
 			if (nbParas > 1) {
 				// add separator between paras
@@ -70,41 +58,19 @@ public class MarkdownParserImpl implements MarkdownParser {
 					_output.eol();
 				}
 			}
-
-			StringBuilder sb = new StringBuilder();
-
-			for (int i = 0; i < para.size(); i++) {
-				String line = para.get(i);
-				if (sb.length() > 0) {
-					// separator between lines
-					sb.append("\n");
-				}
-				if (line.endsWith("  ") && (i < (para.size() - 1))) {
-					// the end of line is added only
-					// if the line with the ending 2 spaces is not the last
-					// line of the paragraph
-					for (int pos = line.length() - 1; pos > 0; pos--) {
-						if (line.charAt(pos) != ' ') {
-							sb.append(line.substring(0, pos + 1));
-							sb.append(" ");
-							sb.append(renderer.linebreak());
-							break;
-						}
-					}
-				} else {
-					sb.append(line);
-				}
-			}
-
-			_output.println(renderer.paragraph(sb.toString()));
+			
+			String p = para.render(renderer, _fileScanner);
+			
+			_output.println(p);
 		}
 
 	}
 
-	private List<String> parseSpanElements(List<String> para,
+	/*********
+	private Paragraph parseSpanElements(Paragraph para,
 			MarkdownRenderer renderer) {
 		ParaLinkParser p = new ParaLinkParser(para);
-		ArrayList<String> result = new ArrayList<String>();
+		Paragraph result = new Paragraph();
 
 		Position p0 = p.position0();
 
@@ -116,7 +82,7 @@ public class MarkdownParserImpl implements MarkdownParser {
 			} else {
 				ParsingCursor cursor = p.cursor();
 				if ((cursor == null) || (cursor._matchEnded == null)) {
-					for (String l : para) {
+					for (String l : para.lines()) {
 						System.out.println(l);
 					}
 					throw new RuntimeException("pos is invalid");
@@ -130,7 +96,7 @@ public class MarkdownParserImpl implements MarkdownParser {
 				// we output the link itself
 				if (link.isLinkId()) {
 					String linkId = link.getLinkId();
-					LinkLabel linkLabel = _linkLabels.get(linkId);
+					LinkLabel linkLabel = _fileScanner.getLinkLabel(linkId);
 					if (linkLabel != null) {
 						linkOutput = renderer.link(linkLabel.getUrl(),
 								linkLabel.getTitle(), link.getLinkText());
@@ -168,4 +134,5 @@ public class MarkdownParserImpl implements MarkdownParser {
 
 		return result;
 	}
+*****/	
 }

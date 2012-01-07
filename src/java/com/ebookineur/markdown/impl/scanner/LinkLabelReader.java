@@ -1,19 +1,15 @@
-package com.ebookineur.markdown.impl;
+package com.ebookineur.markdown.impl.scanner;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class LinkLabelReader {
-	private final Map<String, LinkLabel> _linkLabels = new LinkedHashMap<String, LinkLabelReader.LinkLabel>();
-	private final List<Integer> _linenosWithLinkLabels = new ArrayList<Integer>();
-
-	void readLinkLabels(File input) throws IOException {
+	public void readLinkLabels(File input, Map<String, LinkLabel> linkLabels,
+			List<Integer> linenosWithLinkLabels) throws IOException {
 		BufferedReader br = null;
 		boolean checkTitleOnLine = false;
 		LinkLabel currentLinkLabel = null;
@@ -34,7 +30,7 @@ public class LinkLabelReader {
 					String title = getTitle(line);
 					if (title != null) {
 						currentLinkLabel.setTitle(title);
-						_linenosWithLinkLabels.add(lineno);
+						linenosWithLinkLabels.add(lineno);
 						continue;
 					}
 					checkTitleOnLine = false;
@@ -91,7 +87,7 @@ public class LinkLabelReader {
 						if (posClosing < 0) {
 							state = 99;
 						} else {
-							linkId.append(line.substring(i,posClosing));
+							linkId.append(line.substring(i, posClosing));
 							i = posClosing;
 							state = 11;
 						}
@@ -167,17 +163,17 @@ public class LinkLabelReader {
 
 				// System.out.println("(" + line + "):state=" + state);
 				if (state == 100) {
-					_linkLabels.put(linkId.toString(),
+					linkLabels.put(linkId.toString(),
 							new LinkLabel(linkId.toString(), link.toString(),
 									title.toString()));
-					_linenosWithLinkLabels.add(lineno);
+					linenosWithLinkLabels.add(lineno);
 				} else if ((state == 15) || (state == 14)) {
 					// link without title ... maybe next line!
 					checkTitleOnLine = true;
 					currentLinkLabel = new LinkLabel(linkId.toString(),
 							link.toString());
-					_linkLabels.put(linkId.toString(), currentLinkLabel);
-					_linenosWithLinkLabels.add(lineno);
+					linkLabels.put(linkId.toString(), currentLinkLabel);
+					linenosWithLinkLabels.add(lineno);
 				}
 			}
 
@@ -252,46 +248,6 @@ public class LinkLabelReader {
 			}
 		}
 		return -1;
-	}
-
-	Map<String, LinkLabel> linkLabels() {
-		return _linkLabels;
-	}
-
-	List<Integer> linenosWithLinkLabels() {
-		return _linenosWithLinkLabels;
-	}
-
-	class LinkLabel {
-		private final String _id;
-		private final String _url;
-		private String _title;
-
-		LinkLabel(String id, String url) {
-			_id = id;
-			_url = url;
-		}
-
-		LinkLabel(String id, String url, String title) {
-			this(id, url);
-			_title = title;
-		}
-
-		String getId() {
-			return _id;
-		}
-
-		String getUrl() {
-			return _url;
-		}
-
-		String getTitle() {
-			return _title;
-		}
-
-		void setTitle(String title) {
-			_title = title;
-		}
 	}
 
 }

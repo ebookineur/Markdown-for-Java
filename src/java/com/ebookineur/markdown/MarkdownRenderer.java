@@ -18,4 +18,5 @@ public interface MarkdownRenderer {
 
 	// marker for links
 	String link(String link, String title, String content);
+
 }

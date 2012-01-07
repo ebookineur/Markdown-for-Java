@@ -1,4 +1,4 @@
-package com.ebookineur.markdown.impl;
+package com.ebookineur.markdown.impl.scanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,16 +6,16 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import com.ebookineur.markdown.impl.ParaLinkParser.LinkInfo;
-import com.ebookineur.markdown.impl.ParaParser.ParsingCursor;
-import com.ebookineur.markdown.impl.ParaParser.Position;
+import com.ebookineur.markdown.impl.scanner.Paragraph;
+import com.ebookineur.markdown.impl.scanner.ParaLinkParser.LinkInfo;
+import com.ebookineur.markdown.impl.scanner.ParaParser.ParsingCursor;
+import com.ebookineur.markdown.impl.scanner.ParaParser.Position;
 
 public class TestParaLinkParser {
 	@Test
 	public void test01() throws Exception {
-		List<String> para = new ArrayList<String>();
-
-		para.add("[link](www.google.com)");
+		Paragraph para = new Paragraph();
+		para.addLine("[link](www.google.com)");
 
 		ParaLinkParser p = new ParaLinkParser(para);
 
@@ -35,9 +35,8 @@ public class TestParaLinkParser {
 
 	@Test
 	public void test02() throws Exception {
-		List<String> para = new ArrayList<String>();
-
-		para.add("[link](www.google.com \"title\")");
+		Paragraph para = new Paragraph();
+		para.addLine("[link](www.google.com \"title\")");
 
 		ParaLinkParser p = new ParaLinkParser(para);
 
@@ -55,12 +54,10 @@ public class TestParaLinkParser {
 		checkCursor(cursor, 0, 0, 0, 0, 0, 29);
 	}
 
-
 	@Test
 	public void test03() throws Exception {
-		List<String> para = new ArrayList<String>();
-
-		para.add("[link][id]");
+		Paragraph para = new Paragraph();
+		para.addLine("[link][id]");
 
 		ParaLinkParser p = new ParaLinkParser(para);
 

@@ -1,13 +1,17 @@
-package com.ebookineur.markdown.impl;
+package com.ebookineur.markdown.impl.scanner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
-
-import com.ebookineur.markdown.impl.LinkLabelReader.LinkLabel;
 
 public class TestLinkLabelReader {
 	@Test
@@ -15,11 +19,10 @@ public class TestLinkLabelReader {
 		File f = new File("tests/simple/linklabels.txt");
 
 		LinkLabelReader l = new LinkLabelReader();
+		Map<String, LinkLabel> linkLabels = new LinkedHashMap<String, LinkLabel>();
+		List<Integer> linenosWithLinkLabels = new ArrayList<Integer>();
 
-		l.readLinkLabels(f);
-
-		Map<String, LinkLabel> linkLabels = l.linkLabels();
-		List<Integer> linenosWithLinkLabels = l.linenosWithLinkLabels();
+		l.readLinkLabels(f, linkLabels, linenosWithLinkLabels);
 
 		System.out.println("Nb labels:" + linkLabels.size());
 		for (LinkLabel linklabel : linkLabels.values()) {
@@ -64,7 +67,7 @@ public class TestLinkLabelReader {
 		assertNotNull(linkLabel);
 		assertEquals("link5", linkLabel.getId());
 		assertEquals("www.yahoo.com?p=1", linkLabel.getUrl());
-		assertEquals("Why not yahoo?",linkLabel.getTitle());
+		assertEquals("Why not yahoo?", linkLabel.getTitle());
 
 		assertTrue(linenosWithLinkLabels.contains(3));
 		assertTrue(linenosWithLinkLabels.contains(4));

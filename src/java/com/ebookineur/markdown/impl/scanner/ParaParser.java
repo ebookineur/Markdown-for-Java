@@ -1,13 +1,13 @@
-package com.ebookineur.markdown.impl;
+package com.ebookineur.markdown.impl.scanner;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 class ParaParser {
-	protected final List<String> _paras;
+	protected final Paragraph _paras;
 	protected ParsingCursor _cursor;
 
-	ParaParser(List<String> para) {
+	ParaParser(Paragraph para) {
 		_paras = para;
 	}
 
@@ -55,13 +55,13 @@ class ParaParser {
 		}
 
 		public Position nextChar() {
-			String line = _paras.get(_index);
+			String line = _paras.line(_index);
 			if (_position < line.length() - 1) {
 				// check eol
 				return new Position(_index, _position + 1);
 			}
 			// check end of para
-			if (_index < _paras.size() - 1) {
+			if (!_paras.isLastLine(_index)) {
 				return new Position(_index + 1, 0);
 			} else {
 				return null;
@@ -106,8 +106,8 @@ class ParaParser {
 
 		// System.out.println("p0=" + p0);
 
-		for (index = p0._index; index < _paras.size(); index++) {
-			String line = _paras.get(index).substring(pos0);
+		for (index = p0._index; index < _paras.nbLines(); index++) {
+			String line = _paras.line(index).substring(pos0);
 			if (pos0 == 0) {
 				// if that's a new lne we append to the array
 				result.add(line);
@@ -135,9 +135,9 @@ class ParaParser {
 
 			if (index == p1._index) {
 				// System.out.println("p0=" + p0 + ",p1=" + p1);
-				line = _paras.get(index).substring(pos0, p1._position);
+				line = _paras.line(index).substring(pos0, p1._position);
 			} else {
-				line = _paras.get(index).substring(pos0);
+				line = _paras.line(index).substring(pos0);
 			}
 			if (pos0 == 0) {
 				// if that's a new line we append to the array

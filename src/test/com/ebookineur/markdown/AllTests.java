@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.ebookineur.markdown.impl.TestLinkLabelReader;
-import com.ebookineur.markdown.impl.TestParaLinkParser;
+import com.ebookineur.markdown.impl.scanner.TestLinkLabelReader;
+import com.ebookineur.markdown.impl.scanner.TestParaLinkParser;
 
 @RunWith(Suite.class)
 @SuiteClasses({ TestMarkdownParser.class, TestParaLinkParser.class, TestLinkLabelReader.class })

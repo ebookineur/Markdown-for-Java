@@ -1,12 +1,11 @@
-package com.ebookineur.markdown.impl;
+package com.ebookineur.markdown.impl.scanner;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.ebookineur.markdown.impl.ParaParser.Position;
+import com.ebookineur.markdown.impl.scanner.ParaParser.Position;
 
 public class ParaLinkParser extends ParaParser {
-	ParaLinkParser(List<String> para) {
+	ParaLinkParser(Paragraph para) {
 		super(para);
 	}
 
@@ -23,8 +22,8 @@ public class ParaLinkParser extends ParaParser {
 		int index = -1;
 		int pos = -1;
 
-		for (index = from._index; index < _paras.size() && state != 99; index++) {
-			String line = _paras.get(index);
+		for (index = from._index; index < _paras.nbLines() && state != 99; index++) {
+			String line = _paras.line(index);
 			for (pos = pos0; pos < line.length() && state != 99; pos++) {
 				char c = line.charAt(pos);
 				switch (state) {
@@ -40,7 +39,7 @@ public class ParaLinkParser extends ParaParser {
 					if (posClosing < 0) {
 						state = 99;
 					} else {
-						linkText.append(line.substring(pos,posClosing));
+						linkText.append(line.substring(pos, posClosing));
 						pos = posClosing;
 						state = 2;
 					}
