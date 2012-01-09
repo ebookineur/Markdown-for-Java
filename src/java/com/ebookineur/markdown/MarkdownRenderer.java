@@ -19,4 +19,9 @@ public interface MarkdownRenderer {
 	// marker for links
 	String link(String link, String title, String content);
 
+	String emphasis(String text);
+
+	String double_emphasis(String text);
+
+	String triple_emphasis(String text);
 }

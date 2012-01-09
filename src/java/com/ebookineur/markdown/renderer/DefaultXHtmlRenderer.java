@@ -31,7 +31,7 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<a href=\"");
 		if (link != null) {
-		// TODO: escape query parameters
+			// TODO: escape query parameters
 			sb.append(link);
 		}
 		sb.append("\"");
@@ -44,6 +44,33 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		sb.append(">");
 		sb.append(content);
 		sb.append("</a>");
+		return sb.toString();
+	}
+
+	@Override
+	public String emphasis(String text) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<em>");
+		sb.append(text);
+		sb.append("</em>");
+		return sb.toString();
+	}
+
+	@Override
+	public String double_emphasis(String text) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<strong>");
+		sb.append(text);
+		sb.append("</strong>");
+		return sb.toString();
+	}
+
+	@Override
+	public String triple_emphasis(String text) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<strong><em>");
+		sb.append(text);
+		sb.append("</em></strong>");
 		return sb.toString();
 	}
 }
