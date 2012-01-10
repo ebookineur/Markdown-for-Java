@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ebookineur.markdown.MarkdownRenderer;
+import com.ebookineur.markdown.MarkdownRenderer.HtmlTag;
 
 // group of lines of text
 // inside a block
@@ -85,6 +86,9 @@ public class Paragraph {
 
 			if (c == '\\') {
 				isEscaped = true;
+			} else if (c == '<') {
+				i = processHtmlTag(line, i, p1, result, renderer,
+						documentInformation);
 			} else if (isEqualTo("***", line, i, p1)) {
 				i = processEmphasis("***", "***", line, i, p1, result,
 						N_TRIPLE_EMPHASIS, renderer, documentInformation);
@@ -93,8 +97,8 @@ public class Paragraph {
 						N_DOUBLE_EMPHASIS, renderer, documentInformation);
 			} else if (c == '*') {
 				// emphasis
-				i = processEmphasis("*", "*", line, i, p1, result,
-						N_EMPHASIS, renderer, documentInformation);
+				i = processEmphasis("*", "*", line, i, p1, result, N_EMPHASIS,
+						renderer, documentInformation);
 			} else if (isEqualTo("___", line, i, p1)) {
 				i = processEmphasis("___", "___", line, i, p1, result,
 						N_TRIPLE_EMPHASIS, renderer, documentInformation);
@@ -103,8 +107,12 @@ public class Paragraph {
 						N_DOUBLE_EMPHASIS, renderer, documentInformation);
 			} else if (c == '_') {
 				// emphasis
-				i = processEmphasis("_", "_", line, i, p1, result,
-						N_EMPHASIS, renderer, documentInformation);
+				i = processEmphasis("_", "_", line, i, p1, result, N_EMPHASIS,
+						renderer, documentInformation);
+			} else if (isEqualTo("``", line, i, p1)) {
+				i = processCode("``", "``", line, i, p1, result, renderer);
+			} else if (c == '`') {
+				i = processCode("`", "`", line, i, p1, result, renderer);
 			} else if (c == ' ') {
 				int iEol = checkEol(line, i, p1);
 				if (iEol > 0) {
@@ -182,7 +190,6 @@ public class Paragraph {
 	private int processEmphasis(String matchingStart, String matchingEnd,
 			String line, int pos0, int pos1, StringBuilder result, int nature,
 			MarkdownRenderer renderer, DocumentInformation documentInformation) {
-		// double emphasis
 		int pos2 = findMatching(matchingEnd, line,
 				pos0 + matchingStart.length(), pos1);
 		if (pos2 < 0) {
@@ -205,71 +212,241 @@ public class Paragraph {
 			}
 			return pos2 + matchingEnd.length() - 1;
 		}
-
 	}
 
-	private ParaPosition lookForSpecial(ParaPosition p0, ParaPosition p1) {
-		int pos0 = p0.getPosition();
-		for (int index = p0.getIndexLine(); index <= p1.getIndexLine(); index++) {
-			String line = line(index);
-			int posMax;
-			if (index == p1.getIndexLine()) {
-				posMax = p1.getPosition();
-			} else {
-				posMax = line.length() - 1;
-			}
-			for (int pos = pos0; pos <= posMax; pos++) {
-				char c = line.charAt(pos);
-				if ("[]&*_\\<".indexOf(c) >= 0) {
-					return new ParaPosition(index, pos);
+	private int processCode(String matchingStart, String matchingEnd,
+			String line, int pos0, int pos1, StringBuilder result,
+			MarkdownRenderer renderer) {
+		int pos2 = findMatching(matchingEnd, line,
+				pos0 + matchingStart.length(), pos1);
+		if (pos2 < 0) {
+			result.append(matchingStart);
+			return pos0 + matchingStart.length() - 1;
+		} else {
+			String code = line.substring(pos0 + matchingStart.length(), pos2)
+					.trim();
+			StringBuilder codebd = new StringBuilder();
+			for (int i = 0; i < code.length(); i++) {
+				char c = code.charAt(i);
+				if (c == '<') {
+					codebd.append("&lt;");
+				} else if (c == '>') {
+					codebd.append("&gt;");
+				} else if (c == '&') {
+					codebd.append("&amp;");
+				} else {
+					codebd.append(c);
 				}
 			}
-			pos0 = 0;
-		}
-		return null;
-	}
 
-	private void visit(ParaPosition p0, ParaPosition p1, ParaVisitor visitor) {
-		int pos0 = p0.getPosition();
-		for (int index = p0.getIndexLine(); index <= p1.getIndexLine(); index++) {
-			String line = line(index);
-			int posMax;
-			if (index == p1.getIndexLine()) {
-				posMax = p1.getPosition();
-			} else {
-				posMax = line.length() - 1;
-			}
-			for (int pos = pos0; pos <= posMax; pos++) {
-				char c = line.charAt(pos);
-				visitor.visit(c, index, pos);
-			}
-			pos0 = 0;
+			result.append(renderer.codespan(codebd.toString()));
+			return pos2 + matchingEnd.length() - 1;
 		}
 	}
 
-	private void copy(List<String> result, ParaPosition p0) {
-		int index = -1;
-
-		int pos0 = p0._position;
-
-		// System.out.println("p0=" + p0);
-
-		for (index = p0.getIndexLine(); index < nbLines(); index++) {
-			String line = line(index).substring(pos0);
-			if (pos0 == 0) {
-				// if that's a new line we append to the array
-				result.add(line);
-			} else {
-				// if started in the middle, that means that we need to
-				// append to the last line added
-				String last = result.get(result.size() - 1);
-				line = last + line;
-				result.remove(result.size() - 1);
-				result.add(line);
-			}
-			pos0 = 0;
+	int processHtmlTag(String line, int pos0, int pos1, StringBuilder result,
+			MarkdownRenderer renderer, DocumentInformation documentInformation) {
+		HtmlTagImpl tag = isHtmlTag(line, pos0, pos1);
+		if (tag == null) {
+			// false alert... not an HTML tag
+			result.append("<");
+			return pos0;
 		}
 
+		if (tag.getType() == HtmlTag.TYPE_CLOSING) {
+			// closing tag here doesn't mean anything we output it "as is"
+			result.append(tag.getRawData());
+			return pos0 + tag.getRawData().length() - 1;
+		}
+
+		if (tag.getType() == HtmlTag.TYPE_OPENING_CLOSING) {
+			result.append(renderer.htmlTag(tag, null));
+			return pos0 + tag.getRawData().length() - 1;
+		}
+
+		int pos2 = findMatchingHtmlTag(tag, line, pos0
+				+ tag.getRawData().length(), pos1);
+		if (pos2 < 0) {
+			// we were not able to find a matching closing html tag
+			// we outpur the html tag as is then
+			result.append(tag.getRawData());
+			return pos0 + tag.getRawData().length() - 1;
+		}
+
+		// we got a closing tag
+		String s = render(renderer, documentInformation, line, pos0
+				+ tag.getRawData().length(), pos2);
+		result.append(renderer.htmlTag(tag, s));
+
+		// hack to find the closing position
+		HtmlTagImpl tagClosing = isHtmlTag(line, pos2, pos1);
+		if (tagClosing == null) {
+			// trouble here ... should not happen
+			throw new RuntimeException("oops");
+		}
+
+		return pos2 + tagClosing.getRawData().length() - 1;
+	}
+
+	private int findMatchingHtmlTag(HtmlTagImpl tag, String line, int pos0,
+			int pos1) {
+		int count = 0;
+		for (int i = pos0; i < pos1; i++) {
+			char c = line.charAt(i);
+			if (c == '<') {
+				HtmlTagImpl tag2 = isHtmlTag(line, i, pos1);
+				if (tag2 != null) {
+					if (tag.getTag().equals(tag2.getTag())) {
+						if (tag2.getType() == HtmlTag.TYPE_OPENING) {
+							count++;
+						} else if (tag2.getType() == HtmlTag.TYPE_CLOSING) {
+							if (count == 0) {
+								return i;
+							} else {
+								count--;
+							}
+						}
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
+	HtmlTagImpl isHtmlTag(String line, int pos, int p1) {
+		StringBuilder rawData = new StringBuilder();
+		StringBuilder tagSb = new StringBuilder();
+		StringBuilder parSb = new StringBuilder();
+		StringBuilder valSb = new StringBuilder();
+
+		int type = HtmlTag.TYPE_OPENING;
+
+		HtmlTagImpl tag = null;
+		int state = 0;
+		rawData.append(line.charAt(pos)); // we already know we have an opening
+											// '<' as the first character
+		for (int i = pos + 1; i < p1 && state != 99 && state != 100; i++) {
+			char c = line.charAt(i);
+			rawData.append(c);
+
+			switch (state) {
+			case 0:
+				if (c == ' ') {
+					state = 0;
+				} else if (Character.isLetterOrDigit(c)) {
+					tagSb.append(c);
+					state = 1;
+				} else if (c == '/') {
+					if (type != HtmlTag.TYPE_OPENING) {
+						state = 99;
+					} else {
+						type = HtmlTag.TYPE_CLOSING;
+					}
+				} else {
+					state = 99;
+				}
+				break;
+			case 1:
+				// tag name
+				if (c == ' ') {
+					tag = new HtmlTagImpl(tagSb.toString());
+					state = 2;
+				} else if (Character.isLetterOrDigit(c)) {
+					tagSb.append(c);
+					state = 1;
+				} else if (c == '>') {
+					tag = new HtmlTagImpl(tagSb.toString());
+					state = 100;
+				} else {
+					state = 99;
+				}
+				break;
+			case 2:
+				if (c == ' ') {
+					state = 2;
+				} else if (c == '/') {
+					type = HtmlTag.TYPE_OPENING_CLOSING;
+					state = 8;
+				} else if (c == '>') {
+					state = 100;
+				} else if (Character.isLetterOrDigit(c)) {
+					parSb.append(c);
+					state = 3;
+				}
+				break;
+			case 3:
+				// attribute name
+				if (c == ' ') {
+					state = 4;
+				} else if (Character.isLetterOrDigit(c)) {
+					parSb.append(c);
+					state = 3;
+				} else if (c == '>') {
+					state = 100;
+				} else if (c == '=') {
+					state = 5;
+				} else {
+					state = 99;
+				}
+				break;
+			case 4:
+				if (c == ' ') {
+					state = 4;
+				} else if (c == '=') {
+					state = 5;
+				} else {
+					state = 99;
+				}
+				break;
+
+			case 5:
+				// attribute
+				if (c == ' ') {
+					state = 5;
+				} else if (c == '\'') {
+					state = 6;
+				} else if (c == '"') {
+					state = 7;
+				} else {
+					state = 99;
+				}
+				break;
+
+			case 6:
+				if (c == '\'') {
+					tag.addParameter(parSb.toString(), valSb.toString());
+					state = 2;
+				} else {
+					valSb.append(c);
+				}
+				break;
+
+			case 7:
+				if (c == '"') {
+					tag.addParameter(parSb.toString(), valSb.toString());
+					state = 2;
+				} else {
+					valSb.append(c);
+				}
+				break;
+
+			case 8:
+				if (c == ' ') {
+					state = 8;
+				} else if (c == '>') {
+					state = 100;
+				}
+				break;
+
+			}
+		}
+		if (state == 100) {
+			tag.setRawData(rawData.toString());
+			tag.setType(type);
+			return tag;
+		} else {
+			return null;
+		}
 	}
 
 }

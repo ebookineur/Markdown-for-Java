@@ -1,5 +1,7 @@
 package com.ebookineur.markdown;
 
+import java.util.Iterator;
+
 // from:
 // https://github.com/tanoku/redcarpet
 public interface MarkdownRenderer {
@@ -24,4 +26,24 @@ public interface MarkdownRenderer {
 	String double_emphasis(String text);
 
 	String triple_emphasis(String text);
+
+	String codespan(String text);
+
+	public interface HtmlTag {
+		public final static int TYPE_OPENING = 1;
+		public final static int TYPE_CLOSING = 2;
+		public final static int TYPE_OPENING_CLOSING = 3;
+
+		String getTag();
+
+		String getRawData();
+
+		String getParam(String key);
+
+		Iterator<String> keys();
+
+		int getType();
+	}
+
+	String htmlTag(HtmlTag tag, String text);
 }

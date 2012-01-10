@@ -73,4 +73,28 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		sb.append("</em></strong>");
 		return sb.toString();
 	}
+
+	@Override
+	public String codespan(String text) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<code>");
+		sb.append(text);
+		sb.append("</code>");
+		return sb.toString();
+	}
+
+	@Override
+	public String htmlTag(HtmlTag tag, String text) {
+		StringBuilder sb = new StringBuilder();
+		if (text == null) {
+			sb.append(tag.getRawData());
+		} else {
+			sb.append(tag.getRawData());
+			sb.append(text);
+			sb.append("</");
+			sb.append(tag.getTag());
+			sb.append(">");
+		}
+		return sb.toString();
+	}
 }
