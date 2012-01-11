@@ -6,22 +6,28 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FileScanner implements DocumentInformation {
 	private final File _file;
 
 	private LinkedHashMap<String, LinkLabel> _linkLabels = new LinkedHashMap<String, LinkLabel>();
-	private ArrayList<Integer> _linenosWithLinkLabels = new ArrayList<Integer>();
+	Map<Integer, Integer> _linesMarkers = new LinkedHashMap<Integer, Integer>();
 
 	private final BufferedReader _br;
 	private int _lineno;
 
+	private final List<String> _putBacks = new ArrayList<String>();
+
 	public FileScanner(File f) throws IOException {
 		_file = f;
 
-		// reading the line labels
-		LinkLabelReader lr = new LinkLabelReader();
-		lr.readLinkLabels(_file, _linkLabels, _linenosWithLinkLabels);
+		// pre-processing file
+		InputFilePreprocessor pre = new InputFilePreprocessor(f, _linesMarkers,
+				_linkLabels);
+
+		pre.read();
 
 		_br = new BufferedReader(new FileReader(_file));
 		_lineno = 0;
@@ -47,7 +53,7 @@ public class FileScanner implements DocumentInformation {
 			}
 
 			// check if the linke has to be skipped
-			if (_linenosWithLinkLabels.contains(_lineno)) {
+			if (lineToSkip(_lineno)) {
 				continue;
 			}
 
@@ -65,6 +71,18 @@ public class FileScanner implements DocumentInformation {
 	@Override
 	public LinkLabel getLinkLabel(String linkId) {
 		return _linkLabels.get(linkId);
+	}
+
+	private boolean lineToSkip(int lineno) {
+		Integer t = _linesMarkers.get(lineno);
+		if (t == null) {
+			return false;
+		}
+		int type = t.intValue();
+		if (type == InputFilePreprocessor.LINE_WITHINKLABEL) {
+			return true;
+		}
+		return false;
 	}
 
 }

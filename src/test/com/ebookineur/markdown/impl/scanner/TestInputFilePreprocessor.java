@@ -3,26 +3,25 @@ package com.ebookineur.markdown.impl.scanner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
-public class TestLinkLabelReader {
+public class TestInputFilePreprocessor {
 	@Test
 	public void test01() throws Exception {
 		File f = new File("tests/simple/linklabels.txt");
 
-		LinkLabelReader l = new LinkLabelReader();
+		Map<Integer, Integer> linesMarkers = new LinkedHashMap<Integer, Integer>();
 		Map<String, LinkLabel> linkLabels = new LinkedHashMap<String, LinkLabel>();
-		List<Integer> linenosWithLinkLabels = new ArrayList<Integer>();
 
-		l.readLinkLabels(f, linkLabels, linenosWithLinkLabels);
+		InputFilePreprocessor pre = new InputFilePreprocessor(f, linesMarkers,
+				linkLabels);
+
+		pre.read();
 
 		System.out.println("Nb labels:" + linkLabels.size());
 		for (LinkLabel linklabel : linkLabels.values()) {
@@ -35,7 +34,7 @@ public class TestLinkLabelReader {
 		assertNotNull(linkLabels);
 
 		assertEquals(5, linkLabels.size());
-		assertEquals(6, linenosWithLinkLabels.size());
+		assertEquals(6, linesMarkers.size());
 
 		LinkLabel linkLabel;
 
@@ -69,11 +68,17 @@ public class TestLinkLabelReader {
 		assertEquals("www.yahoo.com?p=1", linkLabel.getUrl());
 		assertEquals("Why not yahoo?", linkLabel.getTitle());
 
-		assertTrue(linenosWithLinkLabels.contains(3));
-		assertTrue(linenosWithLinkLabels.contains(4));
-		assertTrue(linenosWithLinkLabels.contains(5));
-		assertTrue(linenosWithLinkLabels.contains(7));
-		assertTrue(linenosWithLinkLabels.contains(12));
-		assertTrue(linenosWithLinkLabels.contains(13));
+		assertEquals(InputFilePreprocessor.LINE_WITHINKLABEL,
+				linesMarkers.get(3).intValue());
+		assertEquals(InputFilePreprocessor.LINE_WITHINKLABEL,
+				linesMarkers.get(4).intValue());
+		assertEquals(InputFilePreprocessor.LINE_WITHINKLABEL,
+				linesMarkers.get(5).intValue());
+		assertEquals(InputFilePreprocessor.LINE_WITHINKLABEL,
+				linesMarkers.get(7).intValue());
+		assertEquals(InputFilePreprocessor.LINE_WITHINKLABEL,
+				linesMarkers.get(12).intValue());
+		assertEquals(InputFilePreprocessor.LINE_WITHINKLABEL,
+				linesMarkers.get(13).intValue());
 	}
 }
