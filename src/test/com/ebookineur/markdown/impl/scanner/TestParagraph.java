@@ -15,6 +15,11 @@ public class TestParagraph {
 		MarkdownRenderer r = new DefaultXHtmlRenderer();
 
 		DocumentInformation di = new DocumentInformation() {
+			@Override
+			public LinkLabel getLinkLabel(String linkId) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		};
 
 		check(di, r, p, "allo", "allo");
@@ -29,6 +34,11 @@ public class TestParagraph {
 		MarkdownRenderer r = new DefaultXHtmlRenderer();
 
 		DocumentInformation di = new DocumentInformation() {
+			@Override
+			public LinkLabel getLinkLabel(String linkId) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		};
 		check(di, r, p, "allo", "allo");
 		check(di, r, p, "*allo*", "<em>allo</em>");
@@ -43,6 +53,11 @@ public class TestParagraph {
 		MarkdownRenderer r = new DefaultXHtmlRenderer();
 
 		DocumentInformation di = new DocumentInformation() {
+			@Override
+			public LinkLabel getLinkLabel(String linkId) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		};
 		check(di, r, p, "allo", "allo");
 		check(di, r, p, "**allo**", "<strong>allo</strong>");
@@ -95,7 +110,7 @@ public class TestParagraph {
 		assertEquals(line, tag.getRawData());
 		assertEquals("i", tag.getParam("p"));
 		assertEquals(HtmlTag.TYPE_OPENING, tag.getType());
-		
+
 		line = "<span attr='`ticks`'>";
 		tag = p.isHtmlTag(line, 0, line.length());
 		assertNotNull(tag);
@@ -103,7 +118,7 @@ public class TestParagraph {
 		assertEquals(line, tag.getRawData());
 		assertEquals("`ticks`", tag.getParam("attr"));
 		assertEquals(HtmlTag.TYPE_OPENING, tag.getType());
-		
+
 		line = "</ tag >";
 
 		tag = p.isHtmlTag(line, 0, line.length());
@@ -111,7 +126,6 @@ public class TestParagraph {
 		assertEquals("tag", tag.getTag());
 		assertEquals(line, tag.getRawData());
 		assertEquals(HtmlTag.TYPE_CLOSING, tag.getType());
-
 
 		line = "<tag />";
 
@@ -121,7 +135,6 @@ public class TestParagraph {
 		assertEquals(line, tag.getRawData());
 		assertEquals(HtmlTag.TYPE_OPENING_CLOSING, tag.getType());
 
-
 		line = "<tag a='b'/>";
 
 		tag = p.isHtmlTag(line, 0, line.length());
@@ -130,7 +143,6 @@ public class TestParagraph {
 		assertEquals(line, tag.getRawData());
 		assertEquals("b", tag.getParam("a"));
 		assertEquals(HtmlTag.TYPE_OPENING_CLOSING, tag.getType());
-
 
 	}
 

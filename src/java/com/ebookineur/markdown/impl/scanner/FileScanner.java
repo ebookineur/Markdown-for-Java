@@ -62,6 +62,7 @@ public class FileScanner implements DocumentInformation {
 		}
 	}
 
+	@Override
 	public LinkLabel getLinkLabel(String linkId) {
 		return _linkLabels.get(linkId);
 	}

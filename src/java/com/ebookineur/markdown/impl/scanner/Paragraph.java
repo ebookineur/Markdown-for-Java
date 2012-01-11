@@ -2,6 +2,8 @@ package com.ebookineur.markdown.impl.scanner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ebookineur.markdown.MarkdownRenderer;
 import com.ebookineur.markdown.MarkdownRenderer.HtmlTag;
@@ -37,9 +39,6 @@ public class Paragraph {
 
 	public String render(MarkdownRenderer renderer,
 			DocumentInformation documentInformation) {
-		// position at the beginning of the para
-		ParaPosition p0 = new ParaPosition();
-
 		StringBuilder all = new StringBuilder();
 
 		for (String line : _text) {
@@ -88,6 +87,9 @@ public class Paragraph {
 				isEscaped = true;
 			} else if (c == '<') {
 				i = processHtmlTag(line, i, p1, result, renderer,
+						documentInformation);
+			} else if (c == '[') {
+				i = processLink(line, i, p1, result, renderer,
 						documentInformation);
 			} else if (isEqualTo("***", line, i, p1)) {
 				i = processEmphasis("***", "***", line, i, p1, result,
@@ -447,6 +449,189 @@ public class Paragraph {
 		} else {
 			return null;
 		}
+	}
+
+	private final static Pattern _patternLinkInfo = Pattern
+			.compile("\\s*(\\S*)\\s*(\".*\")?\\s*");
+
+	private int processLink(String line, int pos0, int pos1,
+			StringBuilder result, MarkdownRenderer renderer,
+			DocumentInformation documentInformation) {
+		int pos2 = findMatching("[", "]", line, pos0 + 1, pos1);
+		if (pos2 < 0) {
+			result.append("[");
+			return pos0;
+		}
+
+		int state = 0;
+		StringBuilder inBracket = null;
+		StringBuilder inParenthesis = null;
+		int pos = 0;
+		for (pos = pos2 + 1; (pos < pos1) && (state != 99) && (state != 100); pos++) {
+			char c = line.charAt(pos);
+			switch (state) {
+			case 0:
+				if (c == '(') {
+					inParenthesis = new StringBuilder();
+					state = 2;
+				} else if (c == '[') {
+					inBracket = new StringBuilder();
+					state = 3;
+				} else if (c == ' ') {
+					state = 1;
+				} else if (c == '\n') {
+					state = 1;
+				} else {
+					state = 99;
+				}
+				break;
+			case 1:
+				if (c == '[') {
+					inBracket = new StringBuilder();
+					state = 3;
+				} else {
+					state = 99;
+				}
+				break;
+			case 2:
+				if (c == ')') {
+					state = 100;
+				} else {
+					inParenthesis.append(c);
+				}
+				break;
+			case 3:
+				if (c == ']') {
+					state = 100;
+				} else {
+					inBracket.append(c);
+				}
+				break;
+			}
+		}
+
+		String linkText = line.substring(pos0 + 1, pos2);
+
+		// we have [xxxx] or [xxx][]
+		if ((state != 100)
+				|| ((state == 100) && (inBracket != null) && (inBracket
+						.length() == 0))) {
+			String id = getLinkId(linkText);
+			LinkLabel linkLabel = documentInformation.getLinkLabel(id
+					.toString().trim());
+			if (linkLabel != null) {
+				result.append(renderer.link(linkLabel.getUrl(),
+						linkLabel.getTitle(), linkText));
+				if (inBracket == null) {
+					return pos2;
+				} else {
+					// after closing bracket
+					return pos - 1;
+				}
+			} else {
+				// was not a link id
+				result.append("[");
+				return pos0;
+			}
+		}
+
+		if (inParenthesis != null) {
+			if (inParenthesis.length() > 0) {
+				// we have a fully defined link
+				Matcher m = _patternLinkInfo.matcher(inParenthesis);
+				if (m.matches()) {
+					String link = m.group(1);
+					String title = m.group(2);
+					if (title != null) {
+						title = title.substring(1, title.length() - 1);// we
+																		// remove
+																		// the
+																		// "s
+					}
+					result.append(renderer.link(link, title, linkText));
+					return pos - 1; // we already are on the next char at the
+									// end of
+									// the FSM
+				} else {
+					// was not an actual link
+					result.append("[");
+					return pos0;
+				}
+			} else {
+				result.append(renderer.link("", null, linkText));
+				return pos - 1;
+			}
+		}
+
+		if (inBracket != null) {
+			String id = getLinkId(inBracket.toString());
+			LinkLabel linkLabel = documentInformation.getLinkLabel(id
+					.toString().trim());
+			if (linkLabel != null) {
+				result.append(renderer.link(linkLabel.getUrl(),
+						linkLabel.getTitle(), linkText));
+				return pos - 1;
+			} else {
+				// was not a link id
+				result.append("[");
+				return pos0;
+			}
+		}
+
+		result.append("[");
+		return pos0;
+	}
+
+	private String getLinkId(String linkText) {
+		StringBuilder linkId = new StringBuilder();
+		boolean previousWasSpace = true;
+		for (int i = 0; i < linkText.length(); i++) {
+			char c = linkText.charAt(i);
+			if (c == '\n') {
+				c = ' ';
+			}
+			if (c == ' ') {
+				if (!previousWasSpace) {
+					linkId.append(c);
+				}
+				previousWasSpace = true;
+			} else {
+				linkId.append(c);
+				previousWasSpace = false;
+			}
+		}
+		return linkId.toString().trim();
+	}
+
+	private int findMatching(String opening, String closing, String line,
+			int pos0, int pos1) {
+		int count = 0;
+		for (int i = pos0; i < pos1; i++) {
+			char c = line.charAt(i);
+			if (c == '\\') {
+				i++;
+			} else if (isEqualTo(opening, line, i, pos1)) {
+				count++;
+			} else if (isEqualTo(closing, line, i, pos1)) {
+				if (count == 0) {
+					return i;
+				}
+				count--;
+			}
+		}
+		return -1;
+	}
+
+	public static void main(String[] args) throws Exception {
+		Matcher m = _patternLinkInfo
+				.matcher("http://www/google.com?c=0 \"aa bb cc\"");
+		if (m.matches()) {
+			System.out.println("link is (" + m.group(1) + ") , title is ("
+					+ m.group(2) + ")");
+		} else {
+			System.out.println("NO match");
+		}
+
 	}
 
 }
