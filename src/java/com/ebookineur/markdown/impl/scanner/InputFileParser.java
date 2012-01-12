@@ -57,7 +57,7 @@ public class InputFileParser implements DocumentInformation {
 					if (line.startsWith(">")) {
 						flushPara(para);
 						BlockQuotes b = parseBlockQuotes(line);
-						b.render(renderer);
+						b.render(renderer, this);
 					} else {
 						para.addLine(line);
 					}
@@ -88,7 +88,7 @@ public class InputFileParser implements DocumentInformation {
 	}
 
 	private BlockQuotes parseBlockQuotes(String line) throws IOException {
-		BlockQuotes b = new BlockQuotes(_extensions);
+		BlockQuotes b = new BlockQuotes(_extensions, _output);
 		b.addLine(line);
 
 		int state = 0;
@@ -126,21 +126,6 @@ public class InputFileParser implements DocumentInformation {
 			}
 		}
 		return b;
-	}
-
-	private int nbCharsInFront(char lookForChar, String line) {
-		int count = 0;
-
-		for (int i = 0; i < line.length(); i++) {
-			char c = line.charAt(i);
-			if (c == lookForChar) {
-				count++;
-			} else if ((c != ' ') && (c != '\t')) {
-				break;
-			}
-		}
-
-		return count;
 	}
 
 	private boolean isBlankLine(String line) {

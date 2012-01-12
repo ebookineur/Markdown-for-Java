@@ -34,6 +34,7 @@ public class TestMarkdownParser {
 	public void testBlock() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
 		testFile("tests/simple/test50.txt", extensions);
+		testFile("tests/simple/test51.txt", extensions);
 	}
 
 	@Test
