@@ -2,9 +2,7 @@ package com.ebookineur.markdown.impl.scanner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.ebookineur.markdown.MarkdownExtensions;
@@ -51,7 +49,7 @@ public class InputFileParser implements DocumentInformation {
 					break;
 				}
 
-				boolean isBlankLine = line.trim().length() == 0;
+				boolean isBlankLine = isBlankLine(line);
 
 				if (isBlankLine) {
 					flushPara(para);
@@ -59,6 +57,7 @@ public class InputFileParser implements DocumentInformation {
 					if (line.startsWith(">")) {
 						flushPara(para);
 						BlockQuotes b = parseBlockQuotes(line);
+						b.render(renderer);
 					} else {
 						para.addLine(line);
 					}
@@ -88,9 +87,44 @@ public class InputFileParser implements DocumentInformation {
 
 	}
 
-	private BlockQuotes parseBlockQuotes(String line) {
-		BlockQuotes b = new BlockQuotes();
+	private BlockQuotes parseBlockQuotes(String line) throws IOException {
+		BlockQuotes b = new BlockQuotes(_extensions);
 		b.addLine(line);
+
+		int state = 0;
+
+		while (state != 100) {
+			line = _input.nextLine();
+
+			switch (state) {
+			case 0:
+				if (line == null) {
+					state = 100;
+				} else if (line.startsWith(">")) {
+					b.addLine(line);
+				} else if (isBlankLine(line)) {
+					state = 1;
+				}
+				break;
+
+			case 1:
+				if (line == null) {
+					state = 100;
+				} else if (line.startsWith(">")) {
+					b.addLine("");
+					b.addLine(line);
+				} else if (isBlankLine(line)) {
+					state = 1;
+				} else {
+					// we now have a new para... eaning it was the end
+					// of the blockquote
+					_input.putBack("");
+					_input.putBack(line);
+					state = 100;
+				}
+				break;
+			}
+		}
 		return b;
 	}
 
@@ -107,6 +141,10 @@ public class InputFileParser implements DocumentInformation {
 		}
 
 		return count;
+	}
+
+	private boolean isBlankLine(String line) {
+		return line.trim().length() == 0;
 	}
 
 	@Override

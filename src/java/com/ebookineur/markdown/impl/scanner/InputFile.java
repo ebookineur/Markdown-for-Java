@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 public class InputFile {
 	private final Map<Integer, Integer> _linesMarkers;
@@ -14,7 +14,7 @@ public class InputFile {
 	private int _lineno;
 	private boolean _eof;
 
-	private final List<String> _putBacks = new ArrayList<String>();
+	private final Stack<String> _putBacks = new Stack<String>();
 
 	InputFile(File file, Map<Integer, Integer> linesMarkers) throws IOException {
 		_linesMarkers = linesMarkers;
@@ -31,6 +31,9 @@ public class InputFile {
 
 	String nextLine() throws IOException {
 		while (true) {
+			if (_putBacks.size() > 0) {
+				return _putBacks.pop();
+			}
 			if (_eof) {
 				return null;
 			}
@@ -64,6 +67,10 @@ public class InputFile {
 			return true;
 		}
 		return false;
+	}
+
+	public void putBack(String line) {
+		_putBacks.push(line);
 	}
 
 }
