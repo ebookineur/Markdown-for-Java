@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class InputFilePreprocessor {
 	public final static int LINE_WITHINKLABEL = 1;
+	public final static int LINE_TOIGNORE = 2;
 	private final File _file;
 	private final Map<Integer, Integer> _linesMarkers;
 	private final Map<String, LinkLabel> _linkLabels;
@@ -26,7 +27,7 @@ public class InputFilePreprocessor {
 	void read() throws IOException {
 		_checkTitleOnLine = false;
 		BufferedReader br = null;
-
+		String previousLine = null;
 		try {
 			int lineno = 0;
 			br = new BufferedReader(new FileReader(_file));
@@ -40,6 +41,7 @@ public class InputFilePreprocessor {
 				if (checkIfLinkLabelDefinition(line, lineno)) {
 				} else {
 				}
+				previousLine = line;
 			}
 
 		} finally {
@@ -275,4 +277,27 @@ public class InputFilePreprocessor {
 		}
 		return -1;
 	}
+
+	/******
+	 * private boolean checkIfSetextHeader(String line, String previousLine, int
+	 * lineno) { int state = 0; char marker = '\0';
+	 * 
+	 * if (lineno == 1) { return false; } if (previousLine.trim().length() == 0)
+	 * { return false; }
+	 * 
+	 * for (int i = 0; i < line.length(); i++) { char c = line.charAt(i);
+	 * 
+	 * switch (state) { case 0: if ((c != '=') && (c != '-')) { return false; }
+	 * else { marker = c; state = 1; } break;
+	 * 
+	 * case 1: if ((c == ' ') || (c == '\t')) { state = 3; } else if (c !=
+	 * marker) { return false; }
+	 * 
+	 * case 3: if ((c == ' ') || (c == '\t')) { state = 3; } else { return
+	 * false; } break; } } if (state != 1) { return false; }
+	 * _linesMarkers.put(lineno, LINE_TOIGNORE);
+	 * 
+	 * if (marker == '=') { _linesMarkers.put(lineno - 1, LINE_HEADER_1); } else
+	 * { _linesMarkers.put(lineno - 1, LINE_HEADER_2); } return true; }
+	 ******/
 }

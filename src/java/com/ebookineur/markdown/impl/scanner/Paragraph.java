@@ -37,6 +37,10 @@ public class Paragraph {
 		return index == _text.size() - 1;
 	}
 
+	public void reset() {
+		_text.clear();
+	}
+
 	public String render(MarkdownRenderer renderer,
 			DocumentInformation documentInformation) {
 		StringBuilder all = new StringBuilder();
