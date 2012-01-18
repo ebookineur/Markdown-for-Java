@@ -41,7 +41,7 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Code Spans.text", extensions);
 		testFile("tests/1.0.3/Links, inline style.text", extensions);
 		testFile("tests/1.0.3/Links, reference style.text", extensions);
-		//testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
+		testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

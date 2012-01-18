@@ -110,7 +110,7 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			if (lineno > 1) {
 				sb.append("\n");
 			}
-			sb.append(line); // TODO: escaping
+			sb.append(RendererUtil.htmlEscape(line)); 
 		}
 		sb.append("</code></pre>");
 		return sb.toString();
