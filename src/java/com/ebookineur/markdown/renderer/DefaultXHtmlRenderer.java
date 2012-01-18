@@ -1,5 +1,7 @@
 package com.ebookineur.markdown.renderer;
 
+import java.util.List;
+
 import com.ebookineur.markdown.MarkdownRenderer;
 
 public class DefaultXHtmlRenderer implements MarkdownRenderer {
@@ -95,6 +97,22 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			sb.append(tag.getTag());
 			sb.append(">");
 		}
+		return sb.toString();
+	}
+
+	@Override
+	public String code(List<String> text) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<pre><code>");
+		int lineno = 0;
+		for (String line : text) {
+			lineno++;
+			if (lineno > 1) {
+				sb.append("\n");
+			}
+			sb.append(line); // TODO: escaping
+		}
+		sb.append("</code></pre>");
 		return sb.toString();
 	}
 }

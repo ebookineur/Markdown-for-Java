@@ -23,6 +23,8 @@ public class MdInputLinesImpl implements MdInput {
 
 	@Override
 	public void putBack(String line) {
+		//_lines.add(line);
+		
 		_index--;
 	}
 

@@ -35,6 +35,10 @@ public class MdParser {
 					flushPara(para, output);
 					BlockQuotes b = parseBlockQuotes(line, input, output);
 					b.render(_renderer, _di);
+				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
+					flushPara(para, output);
+					BlockCode b = parseBlockCode(line, input, output);
+					b.render(_renderer, _di);
 				} else {
 					para.addLine(line);
 				}
@@ -44,6 +48,10 @@ public class MdParser {
 		// end of file reached
 		flushPara(para, output);
 
+	}
+
+	private boolean isBlankLine(String line) {
+		return line.trim().length() == 0;
 	}
 
 	private void flushPara(Paragraph para, MdOutput output) {
@@ -104,7 +112,35 @@ public class MdParser {
 		return b;
 	}
 
-	private boolean isBlankLine(String line) {
-		return line.trim().length() == 0;
+	private BlockCode parseBlockCode(String line, MdInput input, MdOutput output)
+			throws IOException {
+		BlockCode b = new BlockCode(this, output);
+		b.addLine(line);
+
+		int state = 0;
+
+		while (state != 100) {
+			line = input.nextLine();
+
+			switch (state) {
+			case 0:
+				if (line == null) {
+					state = 100;
+				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
+					b.addLine(line);
+				} else if (isBlankLine(line)) {
+					b.addLine(line);
+				} else {
+					// we now have a new para... meaning it was the end
+					// of the blockquote
+					input.putBack("");
+					input.putBack(line);
+					state = 100;
+				}
+				break;
+			}
+		}
+		return b;
 	}
+
 }
