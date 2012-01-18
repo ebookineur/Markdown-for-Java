@@ -23,11 +23,7 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test03.txt", extensions);
 		testFile("tests/simple/test04.txt", extensions);
 
-		testFile("tests/1.0.3/Strong and em together.text", extensions);
-		testFile("tests/1.0.3/Code Spans.text", extensions);
-
 		testFile("tests/simple/test06.txt", extensions);
-		//testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
 	}
 
 	@Test
@@ -41,8 +37,11 @@ public class TestMarkdownParser {
 	@Test
 	public void test103() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
+		testFile("tests/1.0.3/Strong and em together.text", extensions);
+		testFile("tests/1.0.3/Code Spans.text", extensions);
 		testFile("tests/1.0.3/Links, inline style.text", extensions);
 		testFile("tests/1.0.3/Links, reference style.text", extensions);
+		//testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)
