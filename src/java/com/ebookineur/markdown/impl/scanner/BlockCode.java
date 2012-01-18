@@ -31,6 +31,7 @@ public class BlockCode extends BlockElement {
 				lines.add(line);
 			}
 		}
+		lines.add(""); // TODO: to be compliant with tests but not sure we should
 		String result = renderer.code(lines);
 
 		_output.println(result);

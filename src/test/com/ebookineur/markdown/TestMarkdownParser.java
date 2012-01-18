@@ -42,7 +42,7 @@ public class TestMarkdownParser {
 	public void test103() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
 		testFile("tests/1.0.3/Links, inline style.text", extensions);
-		//testFile("tests/1.0.3/Links, reference style.text", extensions);
+		testFile("tests/1.0.3/Links, reference style.text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

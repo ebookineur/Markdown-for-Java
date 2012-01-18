@@ -39,6 +39,8 @@ public class MdParser {
 					flushPara(para, output);
 					BlockCode b = parseBlockCode(line, input, output);
 					b.render(_renderer, _di);
+				} else if (isHorizontalRule(line)) {
+					output.println(_renderer.hrule());
 				} else {
 					para.addLine(line);
 				}
@@ -119,6 +121,8 @@ public class MdParser {
 
 		int state = 0;
 
+		int nbBlankLines = 0;
+
 		while (state != 100) {
 			line = input.nextLine();
 
@@ -127,9 +131,17 @@ public class MdParser {
 				if (line == null) {
 					state = 100;
 				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
+					if (nbBlankLines > 0) {
+						for (int i = 0; i < nbBlankLines; i++) {
+							b.addLine("");
+						}
+						nbBlankLines = 0;
+					}
 					b.addLine(line);
 				} else if (isBlankLine(line)) {
-					b.addLine(line);
+					// we don't add the blank lines up until we
+					// are sure we are still in a code block
+					nbBlankLines++;
 				} else {
 					// we now have a new para... meaning it was the end
 					// of the blockquote
@@ -143,4 +155,29 @@ public class MdParser {
 		return b;
 	}
 
+	private boolean isHorizontalRule(String line) {
+		int count = 0;
+		char hr = '\0';
+
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+
+			if (hr != '\0') {
+				if ((c != hr) && (c != ' ') && (c != '\t')) {
+					return false;
+				}
+				if (c == hr) {
+					count++;
+				}
+			} else {
+				if ((c == '*') || (c == '-')) {
+					hr = c;
+					count++;
+				} else if ((c != ' ') && (c != '\t')) {
+					return false;
+				}
+			}
+		}
+		return count >= 3;
+	}
 }

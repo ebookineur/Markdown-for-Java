@@ -32,6 +32,8 @@ public interface MarkdownRenderer {
 
 	String code(List<String> text);
 
+	String hrule();
+
 	public interface HtmlTag {
 		public final static int TYPE_OPENING = 1;
 		public final static int TYPE_CLOSING = 2;

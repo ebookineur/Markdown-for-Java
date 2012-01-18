@@ -115,4 +115,11 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		sb.append("</code></pre>");
 		return sb.toString();
 	}
+
+	@Override
+	public String hrule() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<hr />");
+		return sb.toString();
+	}
 }
