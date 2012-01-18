@@ -4,11 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Stack;
 
-public class InputFile {
+public class MdInputFileImpl implements MdInput {
 	private final Map<Integer, Integer> _linesMarkers;
 	private final BufferedReader _br;
 	private int _lineno;
@@ -16,7 +15,7 @@ public class InputFile {
 
 	private final Stack<String> _putBacks = new Stack<String>();
 
-	InputFile(File file, Map<Integer, Integer> linesMarkers) throws IOException {
+	MdInputFileImpl(File file, Map<Integer, Integer> linesMarkers) throws IOException {
 		_linesMarkers = linesMarkers;
 
 		_br = new BufferedReader(new FileReader(file));
@@ -29,7 +28,7 @@ public class InputFile {
 		return _eof;
 	}
 
-	String nextLine() throws IOException {
+	public String nextLine() throws IOException {
 		while (true) {
 			if (_putBacks.size() > 0) {
 				return _putBacks.pop();
@@ -52,7 +51,7 @@ public class InputFile {
 		}
 	}
 
-	void close() throws IOException {
+	public void close() throws IOException {
 		_br.close();
 	}
 

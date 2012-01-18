@@ -24,8 +24,8 @@ public class MarkdownParserImpl implements MarkdownParser {
 	public void parse(File inputFile, File outputFile, MarkdownRenderer renderer) {
 		try {
 			InputFileParser p = new InputFileParser(inputFile, outputFile,
-					_extensions);
-			p.render(renderer);
+					_extensions, renderer);
+			p.render();
 		} catch (IOException ex) {
 			throw new MarkdownException("error processing:"
 					+ inputFile.getAbsolutePath(), ex);

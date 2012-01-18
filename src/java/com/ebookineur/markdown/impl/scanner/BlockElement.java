@@ -3,15 +3,13 @@ package com.ebookineur.markdown.impl.scanner;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ebookineur.markdown.MarkdownExtensions;
-
 public class BlockElement {
-	protected final OutputFile _output;
-	protected final MarkdownExtensions _extensions;
+	protected final MdOutput _output;
+	protected final MdParser _parser;
 	protected final List<String> _lines = new ArrayList<String>();
 
-	public BlockElement(MarkdownExtensions extensions, OutputFile output) {
-		_extensions = extensions;
+	public BlockElement(MdParser parser, MdOutput output) {
+		_parser = parser;
 		_output = output;
 	}
 

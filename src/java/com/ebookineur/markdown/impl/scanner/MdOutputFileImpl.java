@@ -4,27 +4,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-class OutputFile {
+class MdOutputFileImpl implements MdOutput {
 	private final boolean _debug = false;
 	private final PrintWriter _pw;
 
-	public OutputFile(File file) throws IOException {
+	public MdOutputFileImpl(File file) throws IOException {
 		_pw = new PrintWriter(file);
 	}
 
-	void close() {
+	public void close() {
 		_pw.flush();
 		_pw.close();
 	}
 
-	void println(String line) {
+	public void println(String line) {
 		if (_debug) {
 			System.out.println(">>println>" + line + ".");
 		}
 		_pw.println(line);
 	}
 
-	void eol() {
+	public void eol() {
 		if (_debug) {
 			System.out.println(">>eol");
 		}
