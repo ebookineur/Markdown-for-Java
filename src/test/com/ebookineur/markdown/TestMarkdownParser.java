@@ -32,6 +32,7 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test50.txt", extensions);
 		testFile("tests/simple/test51.txt", extensions);
 		testFile("tests/simple/test52.txt", extensions);
+		testFile("tests/simple/test53.txt", extensions);
 	}
 
 	@Test

@@ -1,6 +1,8 @@
 package com.ebookineur.markdown.impl.scanner;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownRenderer;
@@ -38,6 +40,11 @@ public class MdParser {
 				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
 					flushPara(para, output);
 					BlockCode b = parseBlockCode(line, input, output);
+					b.render(_renderer, _di);
+				} else if (isInlineHTML(line)) {
+					flushPara(para, output);
+					BlockInlineHtml b = parseBlockInlineHtml(line, input,
+							output);
 					b.render(_renderer, _di);
 				} else if (isHorizontalRule(line)) {
 					output.println(_renderer.hrule());
@@ -180,4 +187,63 @@ public class MdParser {
 		}
 		return count >= 3;
 	}
+
+	private final static Pattern _patternHtmlStartElement = Pattern
+			.compile("<\\s*(\\S*)\\s*>");
+
+	private final static Pattern _patternHtmlEndElement = Pattern
+			.compile("</\\s*(\\S*)\\s*>");
+
+	private boolean isInlineHTML(String line) {
+		if (line.charAt(0) != '<') {
+			return false;
+		}
+
+		Matcher m = _patternHtmlStartElement.matcher(line);
+		if (!m.matches()) {
+			return false;
+		}
+
+		String element = m.group(1).trim();
+
+		return BlockInlineHtml.isBlockLevelElement(element);
+
+	}
+
+	private BlockInlineHtml parseBlockInlineHtml(String line, MdInput input,
+			MdOutput output) throws IOException {
+		BlockInlineHtml b = new BlockInlineHtml(this, output);
+		b.addLine(line);
+
+		Matcher m = _patternHtmlStartElement.matcher(line);
+		if (!m.matches()) {
+			return null;
+		}
+
+		String element = m.group(1).trim();
+
+		while (true) {
+			line = input.nextLine();
+
+			if (line == null) {
+				break;
+			}
+
+			b.addLine(line);
+
+			if (line.length() > 0) {
+				if (line.charAt(0) == '<') {
+					Matcher m2 = _patternHtmlEndElement.matcher(line);
+					if (m2.matches()) {
+						if (m2.group(1).trim().equals(element)) {
+							break;
+						}
+					}
+
+				}
+			}
+		}
+		return b;
+	}
+
 }

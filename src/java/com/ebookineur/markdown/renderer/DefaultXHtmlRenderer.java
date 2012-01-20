@@ -101,18 +101,32 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	}
 
 	@Override
-	public String code(List<String> text) {
+	public String code(List<String> lines) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<pre><code>");
 		int lineno = 0;
-		for (String line : text) {
+		for (String line : lines) {
 			lineno++;
 			if (lineno > 1) {
 				sb.append("\n");
 			}
-			sb.append(RendererUtil.htmlEscape(line)); 
+			sb.append(RendererUtil.htmlEscape(line));
 		}
 		sb.append("</code></pre>");
+		return sb.toString();
+	}
+
+	@Override
+	public String block_html(List<String> lines) {
+		StringBuilder sb = new StringBuilder();
+		int lineno = 0;
+		for (String line : lines) {
+			lineno++;
+			if (lineno > 1) {
+				sb.append("\n");
+			}
+			sb.append(line);
+		}
 		return sb.toString();
 	}
 

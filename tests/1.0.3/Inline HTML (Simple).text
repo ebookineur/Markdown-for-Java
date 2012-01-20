@@ -1,13 +1,13 @@
 Here's a simple block:
 
 <div>
-	foo
+    foo
 </div>
 
 This should be a code block, though:
 
 	<div>
-		foo
+	    foo
 	</div>
 
 As should this:

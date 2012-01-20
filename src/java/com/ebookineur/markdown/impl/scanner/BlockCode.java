@@ -8,8 +8,6 @@ import com.ebookineur.markdown.MarkdownRenderer;
 
 public class BlockCode extends BlockElement {
 
-	int _currentLevel;
-
 	public BlockCode(MdParser parser, MdOutput output) {
 		super(parser, output);
 	}

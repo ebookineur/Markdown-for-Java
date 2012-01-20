@@ -30,7 +30,9 @@ public interface MarkdownRenderer {
 
 	String codespan(String text);
 
-	String code(List<String> text);
+	String code(List<String> lines);
+
+	String block_html(List<String> lines);
 
 	String hrule();
 
@@ -51,4 +53,5 @@ public interface MarkdownRenderer {
 	}
 
 	String htmlTag(HtmlTag tag, String text);
+
 }
