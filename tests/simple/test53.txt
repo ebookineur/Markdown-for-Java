@@ -6,4 +6,13 @@ and
     <p>whatever</p>
 </div>
 
+<!-- and a comment -->
 
+we can also have multi lines comment!
+
+<!-- this
+is a
+multi lines
+comment -->
+
+end

@@ -46,6 +46,11 @@ public class MdParser {
 					BlockInlineHtml b = parseBlockInlineHtml(line, input,
 							output);
 					b.render(_renderer, _di);
+				} else if (isHTMLComment(line)) {
+					flushPara(para, output);
+					BlockHtmlComment b = parseBlockHtmlComment(line, input,
+							output);
+					b.render(_renderer, _di);
 				} else if (isHorizontalRule(line)) {
 					output.println(_renderer.hrule());
 				} else {
@@ -246,4 +251,38 @@ public class MdParser {
 		return b;
 	}
 
+	private final static Pattern _patternHtmlStartComment = Pattern
+			.compile("\\s*<!--.*");
+
+	private final static Pattern _patternHtmlEndComment = Pattern
+			.compile(".*-->\\s*");
+
+	private boolean isHTMLComment(String line) {
+		if (line.charAt(0) != '<') {
+			return false;
+		}
+
+		Matcher m = _patternHtmlStartComment.matcher(line);
+		return m.matches();
+
+	}
+
+	private BlockHtmlComment parseBlockHtmlComment(String line, MdInput input,
+			MdOutput output) throws IOException {
+		BlockHtmlComment b = new BlockHtmlComment(this, output);
+		b.addLine(line);
+
+		while (true) {
+			Matcher m = _patternHtmlEndComment.matcher(line);
+			if (m.matches()) {
+				return b;
+			} else {
+				line = input.nextLine();
+				if (line == null) {
+					return b;
+				}
+				b.addLine(line);
+			}
+		}
+	}
 }

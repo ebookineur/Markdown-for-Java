@@ -131,6 +131,20 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	}
 
 	@Override
+	public String block_comment(List<String> lines) {
+		StringBuilder sb = new StringBuilder();
+		int lineno = 0;
+		for (String line : lines) {
+			lineno++;
+			if (lineno > 1) {
+				sb.append("\n");
+			}
+			sb.append(line);
+		}
+		return sb.toString();
+	}
+
+	@Override
 	public String hrule() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<hr />");

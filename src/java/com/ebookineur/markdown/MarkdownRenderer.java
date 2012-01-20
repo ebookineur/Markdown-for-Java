@@ -33,6 +33,8 @@ public interface MarkdownRenderer {
 	String code(List<String> lines);
 
 	String block_html(List<String> lines);
+	
+	String block_comment(List<String> lines);
 
 	String hrule();
 
