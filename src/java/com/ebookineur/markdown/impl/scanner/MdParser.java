@@ -41,14 +41,16 @@ public class MdParser {
 					flushPara(para, output);
 					BlockCode b = parseBlockCode(line, input, output);
 					b.render(_renderer, _di);
+				} else if (isHTMLComment(line)) {
+					// IMPORTANT: the HTML comment test has to be before
+					// the inluneHTML one as the latter also detects comments
+					flushPara(para, output);
+					BlockHtmlComment b = parseBlockHtmlComment(line, input,
+							output);
+					b.render(_renderer, _di);
 				} else if (isInlineHTML(line)) {
 					flushPara(para, output);
 					BlockInlineHtml b = parseBlockInlineHtml(line, input,
-							output);
-					b.render(_renderer, _di);
-				} else if (isHTMLComment(line)) {
-					flushPara(para, output);
-					BlockHtmlComment b = parseBlockHtmlComment(line, input,
 							output);
 					b.render(_renderer, _di);
 				} else if (isHorizontalRule(line)) {
@@ -194,10 +196,13 @@ public class MdParser {
 	}
 
 	private final static Pattern _patternHtmlStartElement = Pattern
-			.compile("<\\s*(\\S*)\\s*>");
+			.compile("<\\s*(\\w*)\\s*.*?>");
+
+	private final static Pattern _patternHtmlStartEndElement = Pattern
+			.compile("<\\s*(\\w*)\\s*.*?>.*</\\s*(\\w*)\\s*>");
 
 	private final static Pattern _patternHtmlEndElement = Pattern
-			.compile("</\\s*(\\S*)\\s*>");
+			.compile("</\\s*(\\w*)\\s*>");
 
 	private boolean isInlineHTML(String line) {
 		if (line.charAt(0) != '<') {
@@ -206,7 +211,10 @@ public class MdParser {
 
 		Matcher m = _patternHtmlStartElement.matcher(line);
 		if (!m.matches()) {
-			return false;
+			m = _patternHtmlStartEndElement.matcher(line);
+			if (!m.matches()) {
+				return false;
+			}
 		}
 
 		String element = m.group(1).trim();
@@ -215,6 +223,10 @@ public class MdParser {
 
 	}
 
+	// IMPORTANT: this is not a true HTML parser as the spec would required
+	// the idea is, when we see a <xxx> ar column 0 ... we end the section with
+	// </xxx> at column 0 too
+	// we manage also <xxx/>
 	private BlockInlineHtml parseBlockInlineHtml(String line, MdInput input,
 			MdOutput output) throws IOException {
 		BlockInlineHtml b = new BlockInlineHtml(this, output);
@@ -222,10 +234,26 @@ public class MdParser {
 
 		Matcher m = _patternHtmlStartElement.matcher(line);
 		if (!m.matches()) {
-			return null;
+			m = _patternHtmlStartEndElement.matcher(line);
+			if (!m.matches()) {
+				return null;
+			}
+			return b;
+		}
+		String element = m.group(1).trim();
+
+		// see if the line is closing too!
+		m = _patternHtmlEndElement.matcher(line);
+		if (m.matches()) {
+			if (m.group(1).trim().equals(element)) {
+				return b;
+			}
 		}
 
-		String element = m.group(1).trim();
+		m = _patternHtmlStartEndElement.matcher(line);
+		if (m.matches()) {
+			return b;
+		}
 
 		while (true) {
 			line = input.nextLine();
