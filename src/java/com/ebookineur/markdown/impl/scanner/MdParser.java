@@ -184,7 +184,7 @@ public class MdParser {
 					count++;
 				}
 			} else {
-				if ((c == '*') || (c == '-')) {
+				if ((c == '*') || (c == '-') || (c == '_')) {
 					hr = c;
 					count++;
 				} else if ((c != ' ') && (c != '\t')) {
