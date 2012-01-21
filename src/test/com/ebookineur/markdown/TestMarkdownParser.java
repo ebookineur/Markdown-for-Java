@@ -46,6 +46,7 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Inline HTML comments.text", extensions);
 		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions);
 		testFile("tests/1.0.3/Horizontal rules.text", extensions);
+		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

@@ -22,12 +22,14 @@ public class BlockQuotes extends BlockElement {
 		for (String line : _lines) {
 			int level = 0;
 			int posNonBlank = 0;
+			int posLastMarker = -1;
 
 			// parse the line to count the number of leading '>'
 			for (int i = 0; i < line.length(); i++) {
 				char c = line.charAt(i);
 				if (c == '>') {
 					level++;
+					posLastMarker = i;
 				} else if ((c != ' ') && (c != '\t')) {
 					posNonBlank = i;
 					break;
@@ -41,7 +43,7 @@ public class BlockQuotes extends BlockElement {
 				if (posNonBlank == 0) {
 					lines.add("");
 				} else {
-					lines.add(line.substring(posNonBlank));
+					lines.add(trimLine(line, posLastMarker, posNonBlank));
 				}
 			} else {
 				outputLines(lines, renderer, di);
@@ -49,7 +51,7 @@ public class BlockQuotes extends BlockElement {
 				if (posNonBlank == 0) {
 					lines.add("");
 				} else {
-					lines.add(line.substring(posNonBlank));
+					lines.add(trimLine(line, posLastMarker, posNonBlank));
 				}
 				// this will take care of outputing the <blockquotes>
 				toLevel(level);
@@ -99,6 +101,31 @@ public class BlockQuotes extends BlockElement {
 			}
 		}
 		_currentLevel = level;
+	}
+
+	// we may want to trim a bit if there are leading spaces to make
+	// the block look good
+	private String trimLine(String line, int posLastMarker, int posNonBlank) {
+		int iTrim = -1;
+		int countSpace = 0;
+		for (int i = posLastMarker + 1; i < posNonBlank; i++) {
+			char c = line.charAt(i);
+
+			if (c == '\t') {
+				iTrim = i;
+				countSpace = -1;
+				break;
+			} else if (c == ' ') {
+				countSpace++;
+			}
+		}
+
+		if (iTrim < 0) {
+			iTrim = posLastMarker + 1 + (countSpace % 4);
+		}
+
+		return line.substring(iTrim);
+
 	}
 
 }
