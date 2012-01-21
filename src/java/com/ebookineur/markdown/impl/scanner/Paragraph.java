@@ -628,7 +628,7 @@ public class Paragraph {
 
 	public static void main(String[] args) throws Exception {
 		Matcher m = _patternLinkInfo
-				.matcher("http://www/google.com?c=0 \"aa bb cc\"");
+				.matcher("http://www/google.com?c=0 \"aa bb \"inside\" cc\"");
 		if (m.matches()) {
 			System.out.println("link is (" + m.group(1) + ") , title is ("
 					+ m.group(2) + ")");

@@ -40,7 +40,7 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		if (title != null) {
 			sb.append(" title=\"");
 			// TODO: escape title
-			sb.append(title);
+			sb.append(RendererUtil.attributeEscape(title));
 			sb.append("\"");
 		}
 		sb.append(">");

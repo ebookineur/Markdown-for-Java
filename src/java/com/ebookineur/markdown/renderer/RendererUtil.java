@@ -19,4 +19,19 @@ public class RendererUtil {
 
 		return sb.toString();
 	}
+
+	public static String attributeEscape(String data) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < data.length(); i++) {
+			char c = data.charAt(i);
+			if (c == '"') {
+				sb.append("&quot;");
+			} else {
+				sb.append(c);
+			}
+		}
+
+		return sb.toString();
+	}
 }

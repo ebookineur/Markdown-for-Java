@@ -38,16 +38,21 @@ public class TestMarkdownParser {
 	@Test
 	public void test103() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
-		testFile("tests/1.0.3/Strong and em together.text", extensions);
-		testFile("tests/1.0.3/Code Spans.text", extensions);
+		testFile("tests/1.0.3/Backslash escapes.text", extensions);
+		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
 		testFile("tests/1.0.3/Code Blocks.text", extensions);
-		testFile("tests/1.0.3/Links, inline style.text", extensions);
-		testFile("tests/1.0.3/Links, reference style.text", extensions);
+		testFile("tests/1.0.3/Code Spans.text", extensions);
+		testFile("tests/1.0.3/Hard-wrapped paragraphs with list-like lines.text", extensions);
+		testFile("tests/1.0.3/Horizontal rules.text", extensions);
+		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions);
 		testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
 		testFile("tests/1.0.3/Inline HTML comments.text", extensions);
-		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions);
-		testFile("tests/1.0.3/Horizontal rules.text", extensions);
-		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
+		testFile("tests/1.0.3/Links, inline style.text", extensions);
+		testFile("tests/1.0.3/Links, reference style.text", extensions);
+		testFile("tests/1.0.3/Links, shortcut references.text", extensions);
+		testFile("tests/1.0.3/Literal quotes in titles.text", extensions);
+		
+		testFile("tests/1.0.3/Strong and em together.text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

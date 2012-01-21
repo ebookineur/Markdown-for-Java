@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InputFilePreprocessor {
 	public final static int LINE_WITHINKLABEL = 1;
@@ -161,20 +163,27 @@ public class InputFilePreprocessor {
 			case 15:
 				if ((c == ' ') || (c == '\t')) {
 				} else if (c == '\"') {
-					state = 16;
+					int endTitle = extractTitle(line, i);
+					if (endTitle < 0) {
+						state = 99;
+					} else {
+						title.append(line.substring(i+1,endTitle));
+						i = endTitle;
+						state = 100;
+					}
 				} else if (c == '\'') {
 					state = 17;
 				} else if (c == '(') {
 					state = 18;
 				}
 				break;
-			case 16:
-				if (c == '\"') {
-					state = 100;
-				} else {
-					title.append(c);
-				}
-				break;
+//			case 16:
+//				if (c == '\"') {
+//					state = 100;
+//				} else {
+//					title.append(c);
+//				}
+//				break;
 			case 17:
 				if (c == '\'') {
 					state = 100;
@@ -278,26 +287,18 @@ public class InputFilePreprocessor {
 		return -1;
 	}
 
-	/******
-	 * private boolean checkIfSetextHeader(String line, String previousLine, int
-	 * lineno) { int state = 0; char marker = '\0';
-	 * 
-	 * if (lineno == 1) { return false; } if (previousLine.trim().length() == 0)
-	 * { return false; }
-	 * 
-	 * for (int i = 0; i < line.length(); i++) { char c = line.charAt(i);
-	 * 
-	 * switch (state) { case 0: if ((c != '=') && (c != '-')) { return false; }
-	 * else { marker = c; state = 1; } break;
-	 * 
-	 * case 1: if ((c == ' ') || (c == '\t')) { state = 3; } else if (c !=
-	 * marker) { return false; }
-	 * 
-	 * case 3: if ((c == ' ') || (c == '\t')) { state = 3; } else { return
-	 * false; } break; } } if (state != 1) { return false; }
-	 * _linesMarkers.put(lineno, LINE_TOIGNORE);
-	 * 
-	 * if (marker == '=') { _linesMarkers.put(lineno - 1, LINE_HEADER_1); } else
-	 * { _linesMarkers.put(lineno - 1, LINE_HEADER_2); } return true; }
-	 ******/
+	// this pattern will allow title with quotes inside
+	private final static Pattern _patternTitle = Pattern.compile("(\".*\")");
+
+	// this will return the position of the closing \" for the title
+	private int extractTitle(String line, int pos0) {
+		Matcher m = _patternTitle.matcher(line.substring(pos0));
+		if (m.matches()) {
+			// String title = m.group(1);
+			int end = m.end();
+			return pos0 + end - 1;
+		} else {
+			return -1;
+		}
+	}
 }
