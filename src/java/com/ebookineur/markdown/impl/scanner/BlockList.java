@@ -49,12 +49,12 @@ public class BlockList extends BlockElement {
 
 	static BlockList parseBlockList(String line, MdInput input,
 			MdOutput output, MdParser parser) throws IOException {
+		List<String> pushBacks = new ArrayList<String>();
+
 		BlockList b = new BlockList(parser, output);
 		b.addLine(line);
 
 		int state = 0;
-
-		int nbBlankLines = 0;
 
 		while (state != 100) {
 			line = input.nextLine();
@@ -63,29 +63,58 @@ public class BlockList extends BlockElement {
 			case 0:
 				if (line == null) {
 					state = 100;
-				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
-					if (nbBlankLines > 0) {
-						for (int i = 0; i < nbBlankLines; i++) {
-							b.addLine("");
-						}
-						nbBlankLines = 0;
-					}
+				} else if (isList(line)) {
 					b.addLine(line);
+					state = 0;
 				} else if (isBlankLine(line)) {
-					// we don't add the blank lines up until we
-					// are sure we are still in a code block
-					nbBlankLines++;
+					pushBacks.add(line);
+					state = 1;
+				} else if ((line.charAt(0) == ' ') || (line.charAt(0) == '\t')) {
+					b.addLine(line);
 				} else {
-					// we now have a new para... meaning it was the end
-					// of the blockquote
-					input.putBack("");
-					input.putBack(line);
+					b.addLine(line);
+				}
+				break;
+
+			case 1:
+				if (line == null) {
+					pushBacks(pushBacks, input);
+					state = 100;
+				} else if (isList(line)) {
+					commitPushBacks(pushBacks, b);
+					b.addLine(line);
+					state = 0;
+				} else if (isBlankLine(line)) {
+					pushBacks.add(line);
+				} else if ((line.charAt(0) == ' ') || (line.charAt(0) == '\t')) {
+					commitPushBacks(pushBacks, b);
+					b.addLine(line);
+					state = 1;
+				} else {
+					pushBacks.add(line);
+					pushBacks(pushBacks, input);
 					state = 100;
 				}
 				break;
 			}
+
 		}
 		return b;
+	}
+
+	private static void commitPushBacks(List<String> pushBacks, BlockList b) {
+		for (String line : pushBacks) {
+			b.addLine(line);
+		}
+		pushBacks.clear();
+	}
+
+	private static void pushBacks(List<String> pushBacks, MdInput input) {
+		for (String line : pushBacks) {
+			input.putBack(line);
+		}
+		pushBacks.clear();
+
 	}
 
 	public BlockList(MdParser parser, MdOutput output) {
@@ -94,26 +123,11 @@ public class BlockList extends BlockElement {
 
 	public void render(MarkdownRenderer renderer, DocumentInformation di)
 			throws IOException {
-		// we need to remove any leading 4 spaces or \t from
-		// each line before rendering the code
-		List<String> lines = new ArrayList<String>();
-
+		System.out.println(">>>>>>> list:start>>>>>");
 		for (String line : _lines) {
-			if (line.length() > 0) {
-				if (line.charAt(0) == '\t') {
-					lines.add(line.substring(1));
-				} else {
-					lines.add(line.substring(4));
-				}
-			} else {
-				lines.add(line);
-			}
+			System.out.println(line);
 		}
-		lines.add(""); // TODO: to be compliant with tests but not sure we
-						// should
-		String result = renderer.code(lines);
-
-		_output.println(result);
+		System.out.println(">>>>>>> list:end>>>>>");
 	}
 
 }

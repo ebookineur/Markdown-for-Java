@@ -1,7 +1,8 @@
 package com.ebookineur.markdown;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +34,10 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test51.txt", extensions);
 		testFile("tests/simple/test52.txt", extensions);
 		testFile("tests/simple/test53.txt", extensions);
+
+		//testFile("tests/simple/test60.txt", extensions);
+		testFile("tests/simple/test61.txt", extensions);
+
 	}
 
 	@Test
@@ -42,7 +47,9 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
 		testFile("tests/1.0.3/Code Blocks.text", extensions);
 		testFile("tests/1.0.3/Code Spans.text", extensions);
-		testFile("tests/1.0.3/Hard-wrapped paragraphs with list-like lines.text", extensions);
+		testFile(
+				"tests/1.0.3/Hard-wrapped paragraphs with list-like lines.text",
+				extensions);
 		testFile("tests/1.0.3/Horizontal rules.text", extensions);
 		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions);
 		testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
@@ -51,11 +58,11 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Links, reference style.text", extensions);
 		testFile("tests/1.0.3/Links, shortcut references.text", extensions);
 		testFile("tests/1.0.3/Literal quotes in titles.text", extensions);
-		
+
 		testFile("tests/1.0.3/Nested blockquotes.text", extensions);
-		
+
 		testFile("tests/1.0.3/Strong and em together.text", extensions);
-		//testFile("tests/1.0.3/Tabs.text", extensions);
+		// testFile("tests/1.0.3/Tabs.text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)
@@ -95,35 +102,9 @@ public class TestMarkdownParser {
 
 		String contentActual = readFile(new BufferedReader(new FileReader(
 				resultFile)));
-		
-		assertEquals(new HtmlCompactor(contentExpected).compact(),new HtmlCompactor(contentActual).compact());
 
-		if (false) {
-
-			BufferedReader brExpected = new BufferedReader(new FileReader(
-					expectedFile));
-			BufferedReader brActual = new BufferedReader(new FileReader(
-					resultFile));
-
-			for (int lineno = 1;; lineno++) {
-				String expected = brExpected.readLine();
-				if (expected == null) {
-					break;
-				}
-				String actual = brActual.readLine();
-				if (actual == null) {
-					fail("Missing line in result file(" + resultFileName
-							+ "), lineno=" + lineno);
-				}
-				assertEquals("line:" + lineno, expected, actual);
-			}
-
-			String extra = brActual.readLine();
-			assertNull("testing extra line", extra);
-
-			brExpected.close();
-			brActual.close();
-		}
+		assertEquals(new HtmlCompactor(contentExpected).compact(),
+				new HtmlCompactor(contentActual).compact());
 
 	}
 
