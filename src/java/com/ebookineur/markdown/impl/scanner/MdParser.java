@@ -19,6 +19,8 @@ public class MdParser {
 
 	public void render(MdInput input, MdOutput output) throws IOException {
 		Paragraph para = new Paragraph();
+		
+		boolean previousWasBlank = false;
 
 		while (!input.eof()) {
 			String line = input.nextLine();
@@ -55,7 +57,7 @@ public class MdParser {
 					b.render(_renderer, _di);
 				} else if (isHorizontalRule(line)) {
 					output.println(_renderer.hrule());
-				} else if (BlockList.isList(line)) {
+				} else if (previousWasBlank && BlockList.isList(line)) {
 					flushPara(para, output);
 					BlockList b = BlockList.parseBlockList(line, input, output,
 							this);
@@ -64,6 +66,8 @@ public class MdParser {
 					para.addLine(line);
 				}
 			}
+			
+			previousWasBlank = isBlankLine;
 		}
 
 		// end of file reached

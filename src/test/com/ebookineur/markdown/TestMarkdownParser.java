@@ -42,7 +42,7 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
 		testFile("tests/1.0.3/Code Blocks.text", extensions);
 		testFile("tests/1.0.3/Code Spans.text", extensions);
-		//testFile("tests/1.0.3/Hard-wrapped paragraphs with list-like lines.text", extensions);
+		testFile("tests/1.0.3/Hard-wrapped paragraphs with list-like lines.text", extensions);
 		testFile("tests/1.0.3/Horizontal rules.text", extensions);
 		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions);
 		testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
@@ -54,7 +54,7 @@ public class TestMarkdownParser {
 		
 		testFile("tests/1.0.3/Nested blockquotes.text", extensions);
 		
-		//testFile("tests/1.0.3/Strong and em together.text", extensions);
+		testFile("tests/1.0.3/Strong and em together.text", extensions);
 		//testFile("tests/1.0.3/Tabs.text", extensions);
 	}
 

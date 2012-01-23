@@ -15,6 +15,11 @@ public class BlockList extends BlockElement {
 	private final static int LIST_BULLETED = 2;
 
 	static private int checkIfList(String line) {
+
+		if (line.length() < 2) {
+			return -1;
+		}
+
 		char c = line.charAt(0);
 		if ((c != '*') && (c != '+') && (c != '-') && (!Character.isDigit(c))) {
 			return -1;
@@ -33,7 +38,12 @@ public class BlockList extends BlockElement {
 			}
 			return -1;
 		} else {
-			return LIST_BULLETED;
+			char c1 = line.charAt(1);
+			if ((c1 == ' ') || (c1 == '\t')) {
+				return LIST_BULLETED;
+			} else {
+				return -1;
+			}
 		}
 	}
 
