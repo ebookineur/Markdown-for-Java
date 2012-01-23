@@ -17,4 +17,8 @@ public class BlockElement {
 		_lines.add(line);
 
 	}
+	
+	protected static boolean isBlankLine(String line) {
+		return line.trim().length() == 0;
+	}
 }

@@ -1,8 +1,6 @@
 package com.ebookineur.markdown.impl.scanner;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownRenderer;
@@ -33,28 +31,35 @@ public class MdParser {
 			if (isBlankLine) {
 				flushPara(para, output);
 			} else {
-				if (line.startsWith(">")) {
+				if (BlockQuotes.isQuotes(line)) {
 					flushPara(para, output);
-					BlockQuotes b = parseBlockQuotes(line, input, output);
+					BlockQuotes b = BlockQuotes.parseBlockQuotes(line, input,
+							output, this);
 					b.render(_renderer, _di);
-				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
+				} else if (BlockCode.isCode(line)) {
 					flushPara(para, output);
-					BlockCode b = parseBlockCode(line, input, output);
+					BlockCode b = BlockCode.parseBlockCode(line, input, output,
+							this);
 					b.render(_renderer, _di);
-				} else if (isHTMLComment(line)) {
+				} else if (BlockHtmlComment.isHTMLComment(line)) {
 					// IMPORTANT: the HTML comment test has to be before
 					// the inluneHTML one as the latter also detects comments
 					flushPara(para, output);
-					BlockHtmlComment b = parseBlockHtmlComment(line, input,
-							output);
+					BlockHtmlComment b = BlockHtmlComment
+							.parseBlockHtmlComment(line, input, output, this);
 					b.render(_renderer, _di);
-				} else if (isInlineHTML(line)) {
+				} else if (BlockInlineHtml.isInlineHTML(line)) {
 					flushPara(para, output);
-					BlockInlineHtml b = parseBlockInlineHtml(line, input,
-							output);
+					BlockInlineHtml b = BlockInlineHtml.parseBlockInlineHtml(
+							line, input, output, this);
 					b.render(_renderer, _di);
 				} else if (isHorizontalRule(line)) {
 					output.println(_renderer.hrule());
+				} else if (BlockList.isList(line)) {
+					flushPara(para, output);
+					BlockList b = BlockList.parseBlockList(line, input, output,
+							this);
+					b.render(_renderer, _di);
 				} else {
 					para.addLine(line);
 				}
@@ -84,91 +89,6 @@ public class MdParser {
 
 	}
 
-	// this methods grabs all the lines which are part of a "block quote"
-	// and stores then in a BlockQuotes instance which will then render them
-	private BlockQuotes parseBlockQuotes(String line, MdInput input,
-			MdOutput output) throws IOException {
-		BlockQuotes b = new BlockQuotes(this, output);
-		b.addLine(line);
-
-		int state = 0;
-
-		while (state != 100) {
-			line = input.nextLine();
-
-			switch (state) {
-			case 0:
-				if (line == null) {
-					state = 100;
-				} else if (line.startsWith(">")) {
-					b.addLine(line);
-				} else if (isBlankLine(line)) {
-					state = 1;
-				}
-				break;
-
-			case 1:
-				if (line == null) {
-					state = 100;
-				} else if (line.startsWith(">")) {
-					b.addLine("");
-					b.addLine(line);
-				} else if (isBlankLine(line)) {
-					state = 1;
-				} else {
-					// we now have a new para... meaning it was the end
-					// of the blockquote
-					input.putBack("");
-					input.putBack(line);
-					state = 100;
-				}
-				break;
-			}
-		}
-		return b;
-	}
-
-	private BlockCode parseBlockCode(String line, MdInput input, MdOutput output)
-			throws IOException {
-		BlockCode b = new BlockCode(this, output);
-		b.addLine(line);
-
-		int state = 0;
-
-		int nbBlankLines = 0;
-
-		while (state != 100) {
-			line = input.nextLine();
-
-			switch (state) {
-			case 0:
-				if (line == null) {
-					state = 100;
-				} else if (line.startsWith("    ") || (line.startsWith("\t"))) {
-					if (nbBlankLines > 0) {
-						for (int i = 0; i < nbBlankLines; i++) {
-							b.addLine("");
-						}
-						nbBlankLines = 0;
-					}
-					b.addLine(line);
-				} else if (isBlankLine(line)) {
-					// we don't add the blank lines up until we
-					// are sure we are still in a code block
-					nbBlankLines++;
-				} else {
-					// we now have a new para... meaning it was the end
-					// of the blockquote
-					input.putBack("");
-					input.putBack(line);
-					state = 100;
-				}
-				break;
-			}
-		}
-		return b;
-	}
-
 	private boolean isHorizontalRule(String line) {
 		int count = 0;
 		char hr = '\0';
@@ -195,122 +115,4 @@ public class MdParser {
 		return count >= 3;
 	}
 
-	private final static Pattern _patternHtmlStartElement = Pattern
-			.compile("<\\s*(\\w*)\\s*.*?>");
-
-	private final static Pattern _patternHtmlStartEndElement = Pattern
-			.compile("<\\s*(\\w*)\\s*.*?>.*</\\s*(\\w*)\\s*>");
-
-	private final static Pattern _patternHtmlEndElement = Pattern
-			.compile("</\\s*(\\w*)\\s*>");
-
-	private boolean isInlineHTML(String line) {
-		if (line.charAt(0) != '<') {
-			return false;
-		}
-
-		Matcher m = _patternHtmlStartElement.matcher(line);
-		if (!m.matches()) {
-			m = _patternHtmlStartEndElement.matcher(line);
-			if (!m.matches()) {
-				return false;
-			}
-		}
-
-		String element = m.group(1).trim();
-
-		return BlockInlineHtml.isBlockLevelElement(element);
-
-	}
-
-	// IMPORTANT: this is not a true HTML parser as the spec would required
-	// the idea is, when we see a <xxx> ar column 0 ... we end the section with
-	// </xxx> at column 0 too
-	// we manage also <xxx/>
-	private BlockInlineHtml parseBlockInlineHtml(String line, MdInput input,
-			MdOutput output) throws IOException {
-		BlockInlineHtml b = new BlockInlineHtml(this, output);
-		b.addLine(line);
-
-		Matcher m = _patternHtmlStartElement.matcher(line);
-		if (!m.matches()) {
-			m = _patternHtmlStartEndElement.matcher(line);
-			if (!m.matches()) {
-				return null;
-			}
-			return b;
-		}
-		String element = m.group(1).trim();
-
-		// see if the line is closing too!
-		m = _patternHtmlEndElement.matcher(line);
-		if (m.matches()) {
-			if (m.group(1).trim().equals(element)) {
-				return b;
-			}
-		}
-
-		m = _patternHtmlStartEndElement.matcher(line);
-		if (m.matches()) {
-			return b;
-		}
-
-		while (true) {
-			line = input.nextLine();
-
-			if (line == null) {
-				break;
-			}
-
-			b.addLine(line);
-
-			if (line.length() > 0) {
-				if (line.charAt(0) == '<') {
-					Matcher m2 = _patternHtmlEndElement.matcher(line);
-					if (m2.matches()) {
-						if (m2.group(1).trim().equals(element)) {
-							break;
-						}
-					}
-
-				}
-			}
-		}
-		return b;
-	}
-
-	private final static Pattern _patternHtmlStartComment = Pattern
-			.compile("\\s*<!--.*");
-
-	private final static Pattern _patternHtmlEndComment = Pattern
-			.compile(".*-->\\s*");
-
-	private boolean isHTMLComment(String line) {
-		if (line.charAt(0) != '<') {
-			return false;
-		}
-
-		Matcher m = _patternHtmlStartComment.matcher(line);
-		return m.matches();
-
-	}
-
-	private BlockHtmlComment parseBlockHtmlComment(String line, MdInput input,
-			MdOutput output) throws IOException {
-		BlockHtmlComment b = new BlockHtmlComment(this, output);
-		b.addLine(line);
-
-		while (true) {
-			Matcher m = _patternHtmlEndComment.matcher(line);
-			if (m.matches()) {
-				return b;
-			} else {
-				line = input.nextLine();
-				if (line == null) {
-					return b;
-				}
-				b.addLine(line);
-			}
-		}
-	}
 }

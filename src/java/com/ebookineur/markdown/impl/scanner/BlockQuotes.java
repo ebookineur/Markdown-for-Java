@@ -8,6 +8,54 @@ import com.ebookineur.markdown.MarkdownRenderer;
 
 public class BlockQuotes extends BlockElement {
 
+	static boolean isQuotes(String line) {
+		return (line.startsWith(">"));
+	}
+
+	// this methods grabs all the lines which are part of a "block quote"
+	// and stores then in a BlockQuotes instance which will then render them
+	static BlockQuotes parseBlockQuotes(String line, MdInput input,
+			MdOutput output, MdParser parser) throws IOException {
+		BlockQuotes b = new BlockQuotes(parser, output);
+		b.addLine(line);
+
+		int state = 0;
+
+		while (state != 100) {
+			line = input.nextLine();
+
+			switch (state) {
+			case 0:
+				if (line == null) {
+					state = 100;
+				} else if (line.startsWith(">")) {
+					b.addLine(line);
+				} else if (isBlankLine(line)) {
+					state = 1;
+				}
+				break;
+
+			case 1:
+				if (line == null) {
+					state = 100;
+				} else if (line.startsWith(">")) {
+					b.addLine("");
+					b.addLine(line);
+				} else if (isBlankLine(line)) {
+					state = 1;
+				} else {
+					// we now have a new para... meaning it was the end
+					// of the blockquote
+					input.putBack("");
+					input.putBack(line);
+					state = 100;
+				}
+				break;
+			}
+		}
+		return b;
+	}
+
 	int _currentLevel;
 
 	public BlockQuotes(MdParser parser, MdOutput output) {
