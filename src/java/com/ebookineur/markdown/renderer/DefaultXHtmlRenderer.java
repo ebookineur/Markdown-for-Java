@@ -198,6 +198,7 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			sb.append("</p>");
 		}
 		sb.append("</li>");
+
 		return sb.toString();
 	}
 

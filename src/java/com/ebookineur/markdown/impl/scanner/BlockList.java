@@ -128,30 +128,28 @@ public class BlockList extends BlockElement {
 		}
 		System.out.println(">>>>>>> list:end>>>>>");
 
-		int state = 0;
-
 		// the first line contains a list starting point
-
-		parseList(0, 0, renderer);
+		parseList(0, 0, _output, renderer);
 	}
 
-	private int parseList(int index, int level, MarkdownRenderer renderer) {
+	private int parseList(int index, int level, MdOutput output,
+			MarkdownRenderer renderer) {
 		boolean withPara = false;
 		String firstLine = _lines.get(index);
 
 		int currentIndentMax = (level + 1) * 4;
 		int currentIndentMin = level * 4;
 
-		int type = checkIfList(firstLine);
+		int type = checkIfList(firstLine.trim());
 		if (type < 0) {
-			// should not happen are we 'know' we are
+			// should not happen as we 'know' we are
 			// in a list definition
 			throw new RuntimeException();
 		}
 
 		List<String> items = new ArrayList<String>();
 
-		_output.println(renderer.block_list_start(type, level));
+		output.println(renderer.block_list_start(type, level));
 
 		// we can already add the first line
 		items.add(firstLine.substring(firstChar(firstLine)));
@@ -160,49 +158,64 @@ public class BlockList extends BlockElement {
 		for (int i = index + 1; i < _lines.size(); i++) {
 			String line = _lines.get(i);
 
-			int type0 = checkIfList(line);
+			int type0 = checkIfList(line.trim());
 			int indent = spaceIndent(line);
 
 			if (type0 >= 0) {
 				// we have a new list marker
 				// could either be part of this list or an indented list
-				if ((indent >= currentIndentMin)
-						&& (indent <= currentIndentMax)) {
+				if ((indent >= currentIndentMin) && (indent < currentIndentMax)) {
+					// same list
 					boolean wp = trimEmptyLines(items);
 					if (!withPara) {
 						withPara = wp;
 					}
-					// same list
-					_output.println(renderer.block_list_item(type, level,
-							items, withPara));
-					items.clear();
+
+					if (items.size() > 0) {
+						output.println(renderer.block_list_item(type, level,
+								items, withPara));
+						items.clear();
+					}
 					items.add(line.substring(firstChar(line)));
 
 				} else if (indent < currentIndentMin) {
 					// we are back one indent
 					// so we are closing this list level
-					_output.println(renderer.block_list_end(type, level));
+					if (items.size() > 0) {
+						output.println(renderer.block_list_item(type, level,
+								items, withPara));
+					}
+					output.println(renderer.block_list_end(type, level));
 					return i;
 				} else {
 					// we have an embeded list
-					int end = parseList(i, level + 1, renderer);
+					MdOutputLinesImpl o = new MdOutputLinesImpl();
+
+					int end = parseList(i, level + 1, o, renderer);
+
+					items.addAll(o.getLines());
+					output.println(renderer.block_list_item(type, level, items,
+							withPara));
+					items.clear();
 					i = end - 1; // there is a ++ at in the for loop and
 									// this line has to be processed
 				}
 			} else {
-				if (indent == 0) {
+				if ((indent >= currentIndentMin)
+						&& (indent <= currentIndentMax)) {
 					items.add(line);
 				} else {
+					throw new RuntimeException("TODO: handle that");
 				}
 			}
 		}
 
 		if (items.size() > 0) {
-			_output.println(renderer.block_list_item(type, level, items,
+			output.println(renderer.block_list_item(type, level, items,
 					withPara));
 		}
 
-		_output.println(renderer.block_list_end(type, level));
+		output.println(renderer.block_list_end(type, level));
 		return _lines.size();
 
 	}
