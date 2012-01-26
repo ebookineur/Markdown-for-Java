@@ -145,6 +145,63 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	}
 
 	@Override
+	public String block_quote_start(int level) {
+		return ("<blockquote>");
+	}
+
+	@Override
+	public String block_quote_end(int level) {
+		return ("</blockquote>");
+	}
+
+	@Override
+	public String block_list_start(int type, int level) {
+		switch (type) {
+		case LIST_BULLETED:
+			return "<ul>";
+
+		case LIST_NUMBERED:
+			return "<ol>";
+		}
+		return "<!!>";
+	}
+
+	@Override
+	public String block_list_end(int type, int level) {
+		switch (type) {
+		case LIST_BULLETED:
+			return "</ul>";
+
+		case LIST_NUMBERED:
+			return "</ol>";
+		}
+		return "</!!>";
+	}
+
+	@Override
+	public String block_list_item(int type, int level, List<String> lines,
+			boolean withPara) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<li>");
+		if (withPara) {
+			sb.append("<p>");
+		}
+		int lineno = 0;
+		for (String line : lines) {
+			lineno++;
+			if (lineno > 1) {
+				sb.append("\n");
+			}
+			sb.append(line);
+		}
+		if (withPara) {
+			sb.append("</p>");
+		}
+		sb.append("</li>");
+		return sb.toString();
+	}
+
+	@Override
 	public String hrule() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<hr />");

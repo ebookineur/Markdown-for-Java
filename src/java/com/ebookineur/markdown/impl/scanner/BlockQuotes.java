@@ -102,12 +102,12 @@ public class BlockQuotes extends BlockElement {
 					lines.add(trimLine(line, posLastMarker, posNonBlank));
 				}
 				// this will take care of outputing the <blockquotes>
-				toLevel(level);
+				toLevel(level, renderer);
 			}
 		}
 		outputLines(lines, renderer, di);
 		lines.clear();
-		toLevel(0);
+		toLevel(0, renderer);
 	}
 
 	// actual rendering of the lines
@@ -137,15 +137,15 @@ public class BlockQuotes extends BlockElement {
 		_parser.render(input, _output);
 	}
 
-	void toLevel(int level) {
+	void toLevel(int level, MarkdownRenderer renderer) {
 		if (level == _currentLevel) {
 		} else if (level > _currentLevel) {
 			for (int i = _currentLevel; i < level; i++) {
-				_output.println("<blockquote>");
+				_output.println(renderer.block_quote_start(level));
 			}
 		} else {
 			for (int i = level; i < _currentLevel; i++) {
-				_output.println("</blockquote>");
+				_output.println(renderer.block_quote_end(level));
 			}
 		}
 		_currentLevel = level;

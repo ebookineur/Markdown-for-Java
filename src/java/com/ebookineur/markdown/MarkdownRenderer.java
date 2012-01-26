@@ -6,6 +6,9 @@ import java.util.List;
 // from:
 // https://github.com/tanoku/redcarpet
 public interface MarkdownRenderer {
+	public final static int LIST_NUMBERED = 1;
+	public final static int LIST_BULLETED = 2;
+
 	// Header of the document
 	// Rendered before any another elements
 	String doc_header();
@@ -33,8 +36,18 @@ public interface MarkdownRenderer {
 	String code(List<String> lines);
 
 	String block_html(List<String> lines);
-	
+
 	String block_comment(List<String> lines);
+
+	String block_quote_start(int level);
+
+	String block_quote_end(int level);
+
+	String block_list_start(int type, int level);
+
+	String block_list_end(int type, int level);
+
+	String block_list_item(int type, int level, List<String> lines, boolean withPara);
 
 	String hrule();
 
