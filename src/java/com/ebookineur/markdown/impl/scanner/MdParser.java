@@ -20,7 +20,7 @@ public class MdParser {
 	public void render(MdInput input, MdOutput output) throws IOException {
 		Paragraph para = new Paragraph();
 		
-		boolean previousWasBlank = false;
+		boolean previousWasBlank = true;
 
 		while (!input.eof()) {
 			String line = input.nextLine();

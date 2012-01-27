@@ -172,9 +172,8 @@ public class BlockList extends BlockElement {
 					}
 
 					if (items.size() > 0) {
-						output.println(renderer.block_list_item(type, level,
-								items, withPara));
-						items.clear();
+						itemOutput(level, output, renderer, type, items, null,
+								withPara);
 					}
 					items.add(line.substring(firstChar(line)));
 
@@ -182,8 +181,8 @@ public class BlockList extends BlockElement {
 					// we are back one indent
 					// so we are closing this list level
 					if (items.size() > 0) {
-						output.println(renderer.block_list_item(type, level,
-								items, withPara));
+						itemOutput(level, output, renderer, type, items, null,
+								withPara);
 					}
 					output.println(renderer.block_list_end(type, level));
 					return i;
@@ -193,10 +192,9 @@ public class BlockList extends BlockElement {
 
 					int end = parseList(i, level + 1, o, renderer);
 
-					items.addAll(o.getLines());
-					output.println(renderer.block_list_item(type, level, items,
-							withPara));
-					items.clear();
+					itemOutput(level, output, renderer, type, items,
+							o.getLines(), withPara);
+
 					i = end - 1; // there is a ++ at in the for loop and
 									// this line has to be processed
 				}
@@ -211,8 +209,8 @@ public class BlockList extends BlockElement {
 		}
 
 		if (items.size() > 0) {
-			output.println(renderer.block_list_item(type, level, items,
-					withPara));
+			itemOutput(level, output, renderer, type, items, null,
+					withPara);
 		}
 
 		output.println(renderer.block_list_end(type, level));
@@ -289,4 +287,16 @@ public class BlockList extends BlockElement {
 		// should not happen
 		return line.length() - 1;
 	}
+
+	private void itemOutput(int level, MdOutput output,
+			MarkdownRenderer renderer, int type, List<String> items,
+			List<String> formattedLines, boolean withPara) {
+
+		if (formattedLines != null) {
+			items.addAll(formattedLines);
+		}
+		output.println(renderer.block_list_item(type, level, items, withPara));
+		items.clear();
+	}
+
 }
