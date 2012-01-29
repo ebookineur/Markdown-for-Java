@@ -5,6 +5,8 @@ import java.util.List;
 import com.ebookineur.markdown.MarkdownRenderer;
 
 public class DefaultXHtmlRenderer implements MarkdownRenderer {
+	private final boolean _debug = false;
+
 	public DefaultXHtmlRenderer() {
 	}
 
@@ -181,10 +183,25 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	@Override
 	public String block_list_item(int type, int level, List<String> lines,
 			boolean withPara) {
+
+		if (_debug) {
+			System.out.println("@@ - block_list_item (withPara?:" + withPara
+					+ ")");
+			for (String line : lines) {
+				System.out.println(line);
+			}
+			System.out.println("@@ - end");
+		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("<li>");
+		boolean paraAdded = false;
 		if (withPara) {
-			sb.append("<p>");
+			// we don't add a <p> if the content to insert
+			// already starts with <p>
+			String firstLine = lines.get(0);
+			if (!firstLine.startsWith("<p>")) {
+				paraAdded = true;
+				sb.append("<p>");
+			}
 		}
 		int lineno = 0;
 		for (String line : lines) {
@@ -194,12 +211,21 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			}
 			sb.append(line);
 		}
-		if (withPara) {
+		if (paraAdded) {
 			sb.append("</p>");
 		}
-		sb.append("</li>");
 
-		return sb.toString();
+		// if we don't want paras, we may have to remove it as the
+		// content to process may already be containing this <p>!
+		String content = sb.toString();
+		// if (!withPara) {
+		// if (content.startsWith("<p>")) {
+		// System.out.println("..." + content + "...");
+		// content = content.substring(3, content.length() - 4);
+		// }
+		// }
+
+		return "<li>" + content + "</li>";
 	}
 
 	@Override
@@ -207,5 +233,129 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<hr />");
 		return sb.toString();
+	}
+
+	private String removeTag(String line, String tag) {
+		StringBuilder sb = new StringBuilder();
+		StringBuilder tagName = new StringBuilder();
+
+		int level = 0;
+
+		int state = 0;
+
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+
+			// System.out.println("[" + c + "," + state + "]:" + sb.toString());
+
+			switch (state) {
+			case 0:
+				if (c == '<') {
+					state = 1;
+				} else {
+					sb.append(c);
+				}
+				break;
+
+			case 1:
+				if (c == '/') {
+					state = 5;
+				} else if (c == '>') {
+					// we have an opening tag
+					if (tagName.toString().trim().equalsIgnoreCase(tag)) {
+						if (level == 0) {
+							// we have our opening tag
+							// we don't output it
+							tagName.setLength(0);
+							state = 0;
+						} else {
+							// we have an embeded one, we need
+							// to output it
+							sb.append('<');
+							sb.append(tagName);
+							sb.append('>');
+							tagName.setLength(0);
+							state = 0;
+						}
+						level++;
+					} else {
+						// not our tag... we output it
+						sb.append('<');
+						sb.append(tagName);
+						sb.append('>');
+						tagName.setLength(0);
+						state = 0;
+					}
+				} else {
+					tagName.append(c);
+				}
+				break;
+
+			case 5:
+				if (c == '>') {
+					// we have a closing tag
+					if (tagName.toString().trim().equalsIgnoreCase(tag)) {
+						level--;
+						if (level == 0) {
+							// this is it! we found our matching
+							// closing tag
+							// we append the rest of the string and
+							// we are done!
+							if (i < (line.length() - 1)) {
+								sb.append(line.substring(i + 1));
+							}
+							return sb.toString();
+						} else {
+							// closing an embeded one.. we
+							// output it
+							sb.append("</");
+							sb.append(tagName);
+							sb.append('>');
+							tagName.setLength(0);
+							state = 0;
+						}
+					} else {
+						// not our tag, we output it
+						sb.append("</");
+						sb.append(tagName);
+						sb.append('>');
+						tagName.setLength(0);
+						state = 0;
+					}
+				} else {
+					tagName.append(c);
+				}
+				break;
+			}
+		}
+
+		if (state == 1) {
+			sb.append('<');
+			sb.append(tagName);
+		} else if (state == 5) {
+			sb.append("</");
+			sb.append(tagName);
+		}
+
+		return sb.toString();
+	}
+
+	private void t(String line, String tag) {
+		System.out.println("Removing <" + tag + "> from:");
+		System.out.println(line);
+		System.out.println(removeTag(line, tag));
+		System.out.println(".");
+	}
+
+	public static void main(String[] args) {
+		DefaultXHtmlRenderer x = new DefaultXHtmlRenderer();
+
+		x.t("allo", "p");
+		x.t("<p>allo</p>", "p");
+		x.t("<p>allo   <i>italics</i></p>", "p");
+		x.t("<p>allo   <i>italics</i>xx </p>", "p");
+		x.t("<p>allo</p> blah blah", "p");
+		x.t("<p>allo<p>inside</p></p>", "p");
+		x.t("<p>allo<p>inside</p>xxx</p>", "p");
 	}
 }

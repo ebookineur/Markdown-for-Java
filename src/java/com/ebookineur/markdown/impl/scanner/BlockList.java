@@ -8,6 +8,7 @@ import com.ebookineur.markdown.MarkdownRenderer;
 
 public class BlockList extends BlockElement {
 	private final static String BULLETED_MARKERS = "*+-";
+	private final boolean _debug = false;
 
 	static boolean isList(String line) {
 		return checkIfList(line) > 0;
@@ -122,18 +123,12 @@ public class BlockList extends BlockElement {
 
 	public void render(MarkdownRenderer renderer, DocumentInformation di)
 			throws IOException {
-		System.out.println(">>>>>>> list:start>>>>>");
-		for (String line : _lines) {
-			System.out.println(line);
-		}
-		System.out.println(">>>>>>> list:end>>>>>");
-
 		// the first line contains a list starting point
 		parseList(0, 0, _output, renderer);
 	}
 
 	private int parseList(int index, int level, MdOutput output,
-			MarkdownRenderer renderer) {
+			MarkdownRenderer renderer) throws IOException {
 		boolean withPara = false;
 		String firstLine = _lines.get(index);
 
@@ -209,8 +204,7 @@ public class BlockList extends BlockElement {
 		}
 
 		if (items.size() > 0) {
-			itemOutput(level, output, renderer, type, items, null,
-					withPara);
+			itemOutput(level, output, renderer, type, items, null, withPara);
 		}
 
 		output.println(renderer.block_list_end(type, level));
@@ -290,13 +284,50 @@ public class BlockList extends BlockElement {
 
 	private void itemOutput(int level, MdOutput output,
 			MarkdownRenderer renderer, int type, List<String> items,
-			List<String> formattedLines, boolean withPara) {
+			List<String> formattedLines, boolean withPara) throws IOException {
+
+		if (_debug) {
+			System.out.println(">>>>>>> list:start>>>>>");
+			for (String line : items) {
+				System.out.println(line);
+			}
+			if (formattedLines != null) {
+				System.out.println("......");
+				for (String line : formattedLines) {
+					System.out.println(line);
+				}
+			}
+			System.out.println(">>>>>>> list:end>>>>>");
+		}
+		MdInputLinesImpl input = new MdInputLinesImpl();
+
+		MdOutputLinesImpl o = new MdOutputLinesImpl();
+
+		for (String line : items) {
+			input.addLine(trimLevel(level, line));
+		}
+
+		_parser.render(input, o);
+
+		List<String> result = o.getLines();
 
 		if (formattedLines != null) {
-			items.addAll(formattedLines);
+			result.addAll(formattedLines);
 		}
-		output.println(renderer.block_list_item(type, level, items, withPara));
+		output.println(renderer.block_list_item(type, level, result, withPara));
 		items.clear();
+	}
+
+	private String trimLevel(int level, String line) {
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+			if (c == ' ') {
+			} else if ((c != ' ') && (c != '\t')) {
+				break;
+			}
+		}
+
+		return line;
 	}
 
 }
