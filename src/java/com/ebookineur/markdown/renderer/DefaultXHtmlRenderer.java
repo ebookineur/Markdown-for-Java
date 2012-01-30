@@ -193,16 +193,6 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			System.out.println("@@ - end");
 		}
 		StringBuilder sb = new StringBuilder();
-		boolean paraAdded = false;
-		if (withPara) {
-			// we don't add a <p> if the content to insert
-			// already starts with <p>
-			String firstLine = lines.get(0);
-			if (!firstLine.startsWith("<p>")) {
-				paraAdded = true;
-				sb.append("<p>");
-			}
-		}
 		int lineno = 0;
 		for (String line : lines) {
 			lineno++;
@@ -211,13 +201,15 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			}
 			sb.append(line);
 		}
-		if (paraAdded) {
-			sb.append("</p>");
-		}
 
 		// if we don't want paras, we may have to remove it as the
 		// content to process may already be containing this <p>!
-		String content = sb.toString();
+		String content = null;
+		if (!withPara) {
+			content = removeTag(sb.toString(), "p");
+		} else {
+			content = sb.toString();
+		}
 		// if (!withPara) {
 		// if (content.startsWith("<p>")) {
 		// System.out.println("..." + content + "...");

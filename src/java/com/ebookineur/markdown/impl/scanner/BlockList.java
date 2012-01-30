@@ -8,7 +8,7 @@ import com.ebookineur.markdown.MarkdownRenderer;
 
 public class BlockList extends BlockElement {
 	private final static String BULLETED_MARKERS = "*+-";
-	private final boolean _debug = false;
+	private final boolean _debug = true;
 
 	static boolean isList(String line) {
 		return checkIfList(line) > 0;
@@ -319,15 +319,35 @@ public class BlockList extends BlockElement {
 	}
 
 	private String trimLevel(int level, String line) {
+		StringBuilder sb = new StringBuilder();
+		int countSp = 0;
+		int countTab = 0;
+		int iNonBlank = 0;
 		for (int i = 0; i < line.length(); i++) {
 			char c = line.charAt(i);
 			if (c == ' ') {
-			} else if ((c != ' ') && (c != '\t')) {
+				countSp++;
+			} else if (c == '\t') {
+				countTab++;
+				if (countTab == (level + 1)) {
+					sb.append(line.substring(i));
+					break;
+				}
+			} else if (c == '>') {
+				return (line.substring(i));
+			} else {
+				iNonBlank = i;
 				break;
 			}
 		}
 
-		return line;
-	}
+		if (countSp >= ((level + 1) * 4)) {
+			return line.substring((level + 1) * 4);
+		}
 
+		if (countTab >= (level + 1)) {
+			return line.substring(level + 1);
+		}
+		return line.substring(iNonBlank);
+	}
 }
