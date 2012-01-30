@@ -63,7 +63,7 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Nested blockquotes.text", extensions);
 
 		testFile("tests/1.0.3/Strong and em together.text", extensions);
-		//testFile("tests/1.0.3/Tabs.text", extensions);
+		testFile("tests/1.0.3/Tabs.text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)
