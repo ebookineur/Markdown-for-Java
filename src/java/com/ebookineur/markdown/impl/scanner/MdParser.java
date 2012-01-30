@@ -19,7 +19,7 @@ public class MdParser {
 
 	public void render(MdInput input, MdOutput output) throws IOException {
 		Paragraph para = new Paragraph();
-		
+
 		boolean previousWasBlank = true;
 
 		while (!input.eof()) {
@@ -56,7 +56,13 @@ public class MdParser {
 							line, input, output, this);
 					b.render(_renderer, _di);
 				} else if (isHorizontalRule(line)) {
+					flushPara(para, output);
 					output.println(_renderer.hrule());
+				} else if (BlockHeader.isHeader(line)) {
+					flushPara(para, output);
+					BlockHeader b = BlockHeader.parseBlockHeader(
+							line, input, output, this);
+					b.render(_renderer, _di);
 				} else if (previousWasBlank && BlockList.isList(line)) {
 					flushPara(para, output);
 					BlockList b = BlockList.parseBlockList(line, input, output,
@@ -66,7 +72,7 @@ public class MdParser {
 					para.addLine(line);
 				}
 			}
-			
+
 			previousWasBlank = isBlankLine;
 		}
 

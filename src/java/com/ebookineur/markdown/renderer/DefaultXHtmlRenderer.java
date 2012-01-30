@@ -227,4 +227,16 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		return sb.toString();
 	}
 
+	@Override
+	public String header(String header, int level) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<h");
+		sb.append(level);
+		sb.append(">");
+		sb.append(RendererUtil.removeTag(header, "p"));
+		sb.append("</h");
+		sb.append(level);
+		sb.append(">");
+		return sb.toString();
+	}
 }

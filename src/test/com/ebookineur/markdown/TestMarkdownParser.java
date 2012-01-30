@@ -34,6 +34,7 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test51.txt", extensions);
 		testFile("tests/simple/test52.txt", extensions);
 		testFile("tests/simple/test53.txt", extensions);
+		testFile("tests/simple/test54.txt", extensions);
 
 		testFile("tests/simple/test60.txt", extensions);
 		testFile("tests/simple/test61.txt", extensions);
@@ -61,6 +62,7 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Literal quotes in titles.text", extensions);
 
 		testFile("tests/1.0.3/Nested blockquotes.text", extensions);
+		testFile("tests/1.0.3/Ordered and unordered lists.text", extensions);
 
 		testFile("tests/1.0.3/Strong and em together.text", extensions);
 		testFile("tests/1.0.3/Tabs.text", extensions);

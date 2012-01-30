@@ -65,7 +65,7 @@ public class Paragraph {
 		boolean isEscaped = false;
 		char previous = '\0';
 		char next = '\0';
-
+		
 		for (int i = p0; i < p1; i++) {
 			char c = line.charAt(i);
 

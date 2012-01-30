@@ -47,9 +47,12 @@ public interface MarkdownRenderer {
 
 	String block_list_end(int type, int level);
 
-	String block_list_item(int type, int level, List<String> lines, boolean withPara);
+	String block_list_item(int type, int level, List<String> lines,
+			boolean withPara);
 
 	String hrule();
+
+	String header(String header, int level);
 
 	public interface HtmlTag {
 		public final static int TYPE_OPENING = 1;
