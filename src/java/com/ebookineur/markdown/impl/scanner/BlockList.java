@@ -155,6 +155,12 @@ public class BlockList extends BlockElement {
 
 			int type0 = checkIfList(line.trim());
 			int indent = spaceIndent(line);
+			
+			// a blank line is part of the current group of items
+			if (isBlankLine(line)) {
+				items.add("");
+				continue; // <<======
+			}
 
 			if (type0 >= 0) {
 				// we have a new list marker

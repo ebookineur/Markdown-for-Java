@@ -12,6 +12,8 @@ public class RendererUtil {
 				sb.append("&gt;");
 			} else if (c == '&') {
 				sb.append("&amp;");
+			} else if (c == '\'') {
+				sb.append("&#39;");
 			} else {
 				sb.append(c);
 			}
