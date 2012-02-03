@@ -71,7 +71,7 @@ public interface MarkdownRenderer {
 	}
 
 	String htmlTag(HtmlTag tag, String text);
-	
-	String escapeText(String text);
+
+	String textFragment(String fragment);
 
 }

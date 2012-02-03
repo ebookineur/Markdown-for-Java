@@ -241,7 +241,7 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	}
 
 	@Override
-	public String escapeText(String text) {
+	public String textFragment(String text) {
 		return text;
 	}
 

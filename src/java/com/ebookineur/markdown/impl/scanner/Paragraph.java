@@ -61,11 +61,13 @@ public class Paragraph {
 
 	String render(MarkdownRenderer renderer,
 			DocumentInformation documentInformation, String line, int p0, int p1) {
-		StringBuilder result = new StringBuilder();
+		StringBuilder buffer = new StringBuilder();
 		boolean isEscaped = false;
 		char previous = '\0';
 		char next = '\0';
-		
+
+		Fragment fragment = new Fragment(buffer, renderer);
+
 		for (int i = p0; i < p1; i++) {
 			char c = line.charAt(i);
 
@@ -78,10 +80,10 @@ public class Paragraph {
 			// manage escaped characters
 			if (isEscaped) {
 				if (isEscapable(c)) {
-					result.append(c);
+					fragment.append(c);
 				} else {
-					result.append('\\');
-					result.append(c);
+					fragment.append('\\');
+					fragment.append(c);
 				}
 				isEscaped = false;
 				continue; // <<<
@@ -90,46 +92,46 @@ public class Paragraph {
 			if (c == '\\') {
 				isEscaped = true;
 			} else if (c == '<') {
-				i = processHtmlTag(line, i, p1, result, renderer,
+				i = processHtmlTag(line, i, p1, fragment, renderer,
 						documentInformation);
 			} else if (c == '[') {
-				i = processLink(line, i, p1, result, renderer,
+				i = processLink(line, i, p1, fragment, renderer,
 						documentInformation);
 			} else if (isEqualTo("***", line, i, p1)) {
-				i = processEmphasis("***", "***", line, i, p1, result,
+				i = processEmphasis("***", "***", line, i, p1, fragment,
 						N_TRIPLE_EMPHASIS, renderer, documentInformation);
 			} else if (isEqualTo("**", line, i, p1)) {
-				i = processEmphasis("**", "**", line, i, p1, result,
+				i = processEmphasis("**", "**", line, i, p1, fragment,
 						N_DOUBLE_EMPHASIS, renderer, documentInformation);
 			} else if (c == '*') {
 				// emphasis
-				i = processEmphasis("*", "*", line, i, p1, result, N_EMPHASIS,
+				i = processEmphasis("*", "*", line, i, p1, fragment, N_EMPHASIS,
 						renderer, documentInformation);
 			} else if (isEqualTo("___", line, i, p1)) {
-				i = processEmphasis("___", "___", line, i, p1, result,
+				i = processEmphasis("___", "___", line, i, p1, fragment,
 						N_TRIPLE_EMPHASIS, renderer, documentInformation);
 			} else if (isEqualTo("__", line, i, p1)) {
-				i = processEmphasis("__", "__", line, i, p1, result,
+				i = processEmphasis("__", "__", line, i, p1, fragment,
 						N_DOUBLE_EMPHASIS, renderer, documentInformation);
 			} else if (c == '_') {
 				// emphasis
-				i = processEmphasis("_", "_", line, i, p1, result, N_EMPHASIS,
+				i = processEmphasis("_", "_", line, i, p1, fragment, N_EMPHASIS,
 						renderer, documentInformation);
 			} else if (isEqualTo("``", line, i, p1)) {
-				i = processCode("``", "``", line, i, p1, result, renderer);
+				i = processCode("``", "``", line, i, p1, fragment, renderer);
 			} else if (c == '`') {
-				i = processCode("`", "`", line, i, p1, result, renderer);
+				i = processCode("`", "`", line, i, p1, fragment, renderer);
 			} else if (c == ' ') {
 				int iEol = checkEol(line, i, p1);
 				if (iEol > 0) {
-					result.append(" "); // TODO: really?
-					result.append(renderer.linebreak());
+					fragment.append(" "); // TODO: really?
+					fragment.append(renderer.linebreak());
 					i = iEol - 1;
 				} else {
-					result.append(c);
+					fragment.append(c);
 				}
 			} else {
-				result.append(c);
+				fragment.append(c);
 			}
 
 			if (i > 0) {
@@ -139,7 +141,7 @@ public class Paragraph {
 			}
 		}
 
-		return result.toString();
+		return fragment.toString();
 	}
 
 	private int findMatching(String lookfor, String line, int pos0, int pos1) {
@@ -194,25 +196,25 @@ public class Paragraph {
 	}
 
 	private int processEmphasis(String matchingStart, String matchingEnd,
-			String line, int pos0, int pos1, StringBuilder result, int nature,
+			String line, int pos0, int pos1, Fragment fragment, int nature,
 			MarkdownRenderer renderer, DocumentInformation documentInformation) {
 		int pos2 = findMatching(matchingEnd, line,
 				pos0 + matchingStart.length(), pos1);
 		if (pos2 < 0) {
-			result.append(matchingStart);
+			fragment.append(matchingStart);
 			return pos0 + matchingStart.length() - 1;
 		} else {
 			String s = render(renderer, documentInformation, line, pos0
 					+ matchingStart.length(), pos2);
 			switch (nature) {
 			case N_EMPHASIS:
-				result.append(renderer.emphasis(s));
+				fragment.append(renderer.emphasis(s));
 				break;
 			case N_DOUBLE_EMPHASIS:
-				result.append(renderer.double_emphasis(s));
+				fragment.append(renderer.double_emphasis(s));
 				break;
 			case N_TRIPLE_EMPHASIS:
-				result.append(renderer.triple_emphasis(s));
+				fragment.append(renderer.triple_emphasis(s));
 				break;
 
 			}
@@ -221,12 +223,12 @@ public class Paragraph {
 	}
 
 	private int processCode(String matchingStart, String matchingEnd,
-			String line, int pos0, int pos1, StringBuilder result,
+			String line, int pos0, int pos1, Fragment fragment,
 			MarkdownRenderer renderer) {
 		int pos2 = findMatching(matchingEnd, line,
 				pos0 + matchingStart.length(), pos1);
 		if (pos2 < 0) {
-			result.append(matchingStart);
+			fragment.append(matchingStart);
 			return pos0 + matchingStart.length() - 1;
 		} else {
 			String code = line.substring(pos0 + matchingStart.length(), pos2)
@@ -245,28 +247,28 @@ public class Paragraph {
 				}
 			}
 
-			result.append(renderer.codespan(codebd.toString()));
+			fragment.append(renderer.codespan(codebd.toString()));
 			return pos2 + matchingEnd.length() - 1;
 		}
 	}
 
-	int processHtmlTag(String line, int pos0, int pos1, StringBuilder result,
+	int processHtmlTag(String line, int pos0, int pos1, Fragment fragment,
 			MarkdownRenderer renderer, DocumentInformation documentInformation) {
 		HtmlTagImpl tag = isHtmlTag(line, pos0, pos1);
 		if (tag == null) {
 			// false alert... not an HTML tag
-			result.append("<");
+			fragment.append("<");
 			return pos0;
 		}
 
 		if (tag.getType() == HtmlTag.TYPE_CLOSING) {
 			// closing tag here doesn't mean anything we output it "as is"
-			result.append(tag.getRawData());
+			fragment.append(tag.getRawData());
 			return pos0 + tag.getRawData().length() - 1;
 		}
 
 		if (tag.getType() == HtmlTag.TYPE_OPENING_CLOSING) {
-			result.append(renderer.htmlTag(tag, null));
+			fragment.append(renderer.htmlTag(tag, null));
 			return pos0 + tag.getRawData().length() - 1;
 		}
 
@@ -275,14 +277,14 @@ public class Paragraph {
 		if (pos2 < 0) {
 			// we were not able to find a matching closing html tag
 			// we outpur the html tag as is then
-			result.append(tag.getRawData());
+			fragment.append(tag.getRawData());
 			return pos0 + tag.getRawData().length() - 1;
 		}
 
 		// we got a closing tag
 		String s = render(renderer, documentInformation, line, pos0
 				+ tag.getRawData().length(), pos2);
-		result.append(renderer.htmlTag(tag, s));
+		fragment.append(renderer.htmlTag(tag, s));
 
 		// hack to find the closing position
 		HtmlTagImpl tagClosing = isHtmlTag(line, pos2, pos1);
@@ -459,11 +461,11 @@ public class Paragraph {
 			.compile("\\s*(\\S*)\\s*(\".*\")?\\s*");
 
 	private int processLink(String line, int pos0, int pos1,
-			StringBuilder result, MarkdownRenderer renderer,
+			Fragment fragment, MarkdownRenderer renderer,
 			DocumentInformation documentInformation) {
 		int pos2 = findMatching("[", "]", line, pos0 + 1, pos1);
 		if (pos2 < 0) {
-			result.append("[");
+			fragment.append("[");
 			return pos0;
 		}
 
@@ -524,7 +526,7 @@ public class Paragraph {
 			LinkLabel linkLabel = documentInformation.getLinkLabel(id
 					.toString().trim());
 			if (linkLabel != null) {
-				result.append(renderer.link(linkLabel.getUrl(),
+				fragment.append(renderer.link(linkLabel.getUrl(),
 						linkLabel.getTitle(), linkText));
 				if (inBracket == null) {
 					return pos2;
@@ -534,7 +536,7 @@ public class Paragraph {
 				}
 			} else {
 				// was not a link id
-				result.append("[");
+				fragment.append("[");
 				return pos0;
 			}
 		}
@@ -552,17 +554,17 @@ public class Paragraph {
 																		// the
 																		// "s
 					}
-					result.append(renderer.link(link, title, linkText));
+					fragment.append(renderer.link(link, title, linkText));
 					return pos - 1; // we already are on the next char at the
 									// end of
 									// the FSM
 				} else {
 					// was not an actual link
-					result.append("[");
+					fragment.append("[");
 					return pos0;
 				}
 			} else {
-				result.append(renderer.link("", null, linkText));
+				fragment.append(renderer.link("", null, linkText));
 				return pos - 1;
 			}
 		}
@@ -572,17 +574,17 @@ public class Paragraph {
 			LinkLabel linkLabel = documentInformation.getLinkLabel(id
 					.toString().trim());
 			if (linkLabel != null) {
-				result.append(renderer.link(linkLabel.getUrl(),
+				fragment.append(renderer.link(linkLabel.getUrl(),
 						linkLabel.getTitle(), linkText));
 				return pos - 1;
 			} else {
 				// was not a link id
-				result.append("[");
+				fragment.append("[");
 				return pos0;
 			}
 		}
 
-		result.append("[");
+		fragment.append("[");
 		return pos0;
 	}
 
