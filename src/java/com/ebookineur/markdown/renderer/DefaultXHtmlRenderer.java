@@ -2,12 +2,15 @@ package com.ebookineur.markdown.renderer;
 
 import java.util.List;
 
+import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownRenderer;
 
 public class DefaultXHtmlRenderer implements MarkdownRenderer {
 	private final boolean _debug = false;
+	private final MarkdownExtensions _extensions;
 
-	public DefaultXHtmlRenderer() {
+	public DefaultXHtmlRenderer(MarkdownExtensions extensions) {
+		_extensions = extensions;
 	}
 
 	@Override
@@ -242,7 +245,12 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 
 	@Override
 	public String textFragment(String text) {
-		return text;
+		System.out.println("::" + text);
+		if (_extensions.doEscapeInFragment()) {
+			return RendererUtil.htmlEscape(text);
+		} else {
+			return text;
+		}
 	}
 
 	private String escapeHtml(String data) {

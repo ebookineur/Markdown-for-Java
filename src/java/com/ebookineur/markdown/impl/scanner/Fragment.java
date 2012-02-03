@@ -16,6 +16,10 @@ public class Fragment {
 		_fragment.append(c);
 	}
 
+	void push(String s) {
+		_fragment.append(s);
+	}
+
 	void append(char c) {
 		flush();
 		_result.append(c);
@@ -27,9 +31,11 @@ public class Fragment {
 	}
 
 	void flush() {
-		String data = _renderer.textFragment(_fragment.toString());
-		_result.append(data);
-		_fragment.setLength(0);
+		if (_fragment.length() > 0) {
+			String data = _renderer.textFragment(_fragment.toString());
+			_fragment.setLength(0);
+			_result.append(data);
+		}
 	}
 
 	public String toString() {

@@ -80,10 +80,10 @@ public class Paragraph {
 			// manage escaped characters
 			if (isEscaped) {
 				if (isEscapable(c)) {
-					fragment.append(c);
+					fragment.push(c);
 				} else {
-					fragment.append('\\');
-					fragment.append(c);
+					fragment.push('\\');
+					fragment.push(c);
 				}
 				isEscaped = false;
 				continue; // <<<
@@ -124,14 +124,14 @@ public class Paragraph {
 			} else if (c == ' ') {
 				int iEol = checkEol(line, i, p1);
 				if (iEol > 0) {
-					fragment.append(" "); // TODO: really?
+					fragment.push(" "); // TODO: really?
 					fragment.append(renderer.linebreak());
 					i = iEol - 1;
 				} else {
-					fragment.append(c);
+					fragment.push(c);
 				}
 			} else {
-				fragment.append(c);
+				fragment.push(c);
 			}
 
 			if (i > 0) {
@@ -257,13 +257,13 @@ public class Paragraph {
 		HtmlTagImpl tag = isHtmlTag(line, pos0, pos1);
 		if (tag == null) {
 			// false alert... not an HTML tag
-			fragment.append("<");
+			fragment.push("<");
 			return pos0;
 		}
 
 		if (tag.getType() == HtmlTag.TYPE_CLOSING) {
 			// closing tag here doesn't mean anything we output it "as is"
-			fragment.append(tag.getRawData());
+			fragment.push(tag.getRawData());
 			return pos0 + tag.getRawData().length() - 1;
 		}
 
@@ -277,7 +277,7 @@ public class Paragraph {
 		if (pos2 < 0) {
 			// we were not able to find a matching closing html tag
 			// we outpur the html tag as is then
-			fragment.append(tag.getRawData());
+			fragment.push(tag.getRawData());
 			return pos0 + tag.getRawData().length() - 1;
 		}
 

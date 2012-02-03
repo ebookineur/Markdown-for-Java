@@ -4,15 +4,19 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.ebookineur.markdown.MarkdownExtensions;
 import com.ebookineur.markdown.MarkdownRenderer;
 import com.ebookineur.markdown.MarkdownRenderer.HtmlTag;
+import com.ebookineur.markdown.impl.MarkdownFactory;
 import com.ebookineur.markdown.renderer.DefaultXHtmlRenderer;
 
 public class TestParagraph {
 	@Test
 	public void test01() throws Exception {
+		MarkdownExtensions extensions = MarkdownFactory.extensions();
+
 		Paragraph p = new Paragraph();
-		MarkdownRenderer r = new DefaultXHtmlRenderer();
+		MarkdownRenderer r = new DefaultXHtmlRenderer(extensions);
 
 		DocumentInformation di = new DocumentInformation() {
 			@Override
@@ -30,8 +34,10 @@ public class TestParagraph {
 
 	@Test
 	public void test02() throws Exception {
+		MarkdownExtensions extensions = MarkdownFactory.extensions();
+
 		Paragraph p = new Paragraph();
-		MarkdownRenderer r = new DefaultXHtmlRenderer();
+		MarkdownRenderer r = new DefaultXHtmlRenderer(extensions);
 
 		DocumentInformation di = new DocumentInformation() {
 			@Override
@@ -49,8 +55,10 @@ public class TestParagraph {
 
 	@Test
 	public void test03() throws Exception {
+		MarkdownExtensions extensions = MarkdownFactory.extensions();
+
 		Paragraph p = new Paragraph();
-		MarkdownRenderer r = new DefaultXHtmlRenderer();
+		MarkdownRenderer r = new DefaultXHtmlRenderer(extensions);
 
 		DocumentInformation di = new DocumentInformation() {
 			@Override

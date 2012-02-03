@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -17,8 +19,14 @@ import com.googlecode.htmlcompactor.HtmlCompactor;
 
 public class TestMarkdownParser {
 	@Test
-	public void testSimple() throws Exception {
+	public void test() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
+		testFile("tests/simple/test64.txt", extensions);
+	}
+
+	@Test
+	public void testSimple() throws Exception {
+		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
 		testFile("tests/simple/test01.txt", extensions);
 		testFile("tests/simple/test02.txt", extensions);
 		testFile("tests/simple/test03.txt", extensions);
@@ -45,7 +53,7 @@ public class TestMarkdownParser {
 
 	@Test
 	public void test103() throws Exception {
-		MarkdownExtensions extensions = MarkdownFactory.extensions();
+		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
 		testFile("tests/1.0.3/Backslash escapes.text", extensions);
 		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
 		testFile("tests/1.0.3/Code Blocks.text", extensions);
@@ -63,7 +71,7 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Literal quotes in titles.text", extensions);
 
 		testFile("tests/1.0.3/Nested blockquotes.text", extensions);
-		//testFile("tests/1.0.3/Ordered and unordered lists.text", extensions);
+		// testFile("tests/1.0.3/Ordered and unordered lists.text", extensions);
 
 		testFile("tests/1.0.3/Strong and em together.text", extensions);
 		testFile("tests/1.0.3/Tabs.text", extensions);
@@ -82,7 +90,7 @@ public class TestMarkdownParser {
 		String expectedFileName = fileName.substring(0, pos) + ".html";
 		String resultFileName = fileName + ".result.html";
 
-		MarkdownRenderer renderer = new DefaultXHtmlRenderer();
+		MarkdownRenderer renderer = new DefaultXHtmlRenderer(extensions);
 
 		MarkdownParser parser = MarkdownFactory.parser(extensions);
 
@@ -124,5 +132,11 @@ public class TestMarkdownParser {
 			}
 			sb.append(line);
 		}
+	}
+
+	private MarkdownExtensions extensionsNoEscapeInFragment() {
+		Map<String, String> props = new HashMap<String, String>();
+		props.put("doEscapeInFragment", "false");
+		return MarkdownFactory.extensions(props);
 	}
 }
