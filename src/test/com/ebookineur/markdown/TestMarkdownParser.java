@@ -21,7 +21,7 @@ public class TestMarkdownParser {
 	@Test
 	public void test() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
-		testFile("tests/simple/test64.txt", extensions);
+		testFile("tests/1.0.3/Amps and angle encoding.text", extensions);
 	}
 
 	@Test
@@ -53,28 +53,31 @@ public class TestMarkdownParser {
 
 	@Test
 	public void test103() throws Exception {
-		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
-		testFile("tests/1.0.3/Backslash escapes.text", extensions);
-		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions);
-		testFile("tests/1.0.3/Code Blocks.text", extensions);
-		testFile("tests/1.0.3/Code Spans.text", extensions);
+		MarkdownExtensions extensions1 = MarkdownFactory.extensions();
+		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
+
+		testFile("tests/1.0.3/Amps and angle encoding.text", extensions1);
+		testFile("tests/1.0.3/Backslash escapes.text", extensions2);
+		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions2);
+		testFile("tests/1.0.3/Code Blocks.text", extensions2);
+		testFile("tests/1.0.3/Code Spans.text", extensions2);
 		testFile(
 				"tests/1.0.3/Hard-wrapped paragraphs with list-like lines.text",
-				extensions);
-		testFile("tests/1.0.3/Horizontal rules.text", extensions);
-		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions);
-		testFile("tests/1.0.3/Inline HTML (Simple).text", extensions);
-		testFile("tests/1.0.3/Inline HTML comments.text", extensions);
-		testFile("tests/1.0.3/Links, inline style.text", extensions);
-		testFile("tests/1.0.3/Links, reference style.text", extensions);
-		testFile("tests/1.0.3/Links, shortcut references.text", extensions);
-		testFile("tests/1.0.3/Literal quotes in titles.text", extensions);
+				extensions2);
+		testFile("tests/1.0.3/Horizontal rules.text", extensions2);
+		testFile("tests/1.0.3/Inline HTML (Advanced).text", extensions2);
+		testFile("tests/1.0.3/Inline HTML (Simple).text", extensions2);
+		testFile("tests/1.0.3/Inline HTML comments.text", extensions2);
+		testFile("tests/1.0.3/Links, inline style.text", extensions2);
+		testFile("tests/1.0.3/Links, reference style.text", extensions2);
+		testFile("tests/1.0.3/Links, shortcut references.text", extensions2);
+		testFile("tests/1.0.3/Literal quotes in titles.text", extensions2);
 
-		testFile("tests/1.0.3/Nested blockquotes.text", extensions);
+		testFile("tests/1.0.3/Nested blockquotes.text", extensions2);
 		// testFile("tests/1.0.3/Ordered and unordered lists.text", extensions);
 
-		testFile("tests/1.0.3/Strong and em together.text", extensions);
-		testFile("tests/1.0.3/Tabs.text", extensions);
+		testFile("tests/1.0.3/Strong and em together.text", extensions2);
+		testFile("tests/1.0.3/Tabs.text", extensions2);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

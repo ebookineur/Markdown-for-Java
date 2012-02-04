@@ -39,17 +39,17 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		sb.append("<a href=\"");
 		if (link != null) {
 			// TODO: escape query parameters
-			sb.append(link);
+			sb.append(RendererUtil.htmlEscape(link));
 		}
 		sb.append("\"");
 		if (title != null) {
 			sb.append(" title=\"");
 			// TODO: escape title
-			sb.append(RendererUtil.attributeEscape(title));
+			sb.append(RendererUtil.attributeEscape(RendererUtil.htmlEscape(title)));
 			sb.append("\"");
 		}
 		sb.append(">");
-		sb.append(content);
+		sb.append(RendererUtil.htmlEscape(content));
 		sb.append("</a>");
 		return sb.toString();
 	}
@@ -102,6 +102,13 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 			sb.append(tag.getTag());
 			sb.append(">");
 		}
+		return sb.toString();
+	}
+
+	@Override
+	public String htmlEntity(HtmlEntity entity) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(entity.getRawData());
 		return sb.toString();
 	}
 

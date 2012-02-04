@@ -91,6 +91,9 @@ public class Paragraph {
 
 			if (c == '\\') {
 				isEscaped = true;
+			} else if (c == '&') {
+				i = processHtmlEntity(line, i, p1, fragment, renderer,
+						documentInformation);
 			} else if (c == '<') {
 				i = processHtmlTag(line, i, p1, fragment, renderer,
 						documentInformation);
@@ -105,8 +108,8 @@ public class Paragraph {
 						N_DOUBLE_EMPHASIS, renderer, documentInformation);
 			} else if (c == '*') {
 				// emphasis
-				i = processEmphasis("*", "*", line, i, p1, fragment, N_EMPHASIS,
-						renderer, documentInformation);
+				i = processEmphasis("*", "*", line, i, p1, fragment,
+						N_EMPHASIS, renderer, documentInformation);
 			} else if (isEqualTo("___", line, i, p1)) {
 				i = processEmphasis("___", "___", line, i, p1, fragment,
 						N_TRIPLE_EMPHASIS, renderer, documentInformation);
@@ -115,8 +118,8 @@ public class Paragraph {
 						N_DOUBLE_EMPHASIS, renderer, documentInformation);
 			} else if (c == '_') {
 				// emphasis
-				i = processEmphasis("_", "_", line, i, p1, fragment, N_EMPHASIS,
-						renderer, documentInformation);
+				i = processEmphasis("_", "_", line, i, p1, fragment,
+						N_EMPHASIS, renderer, documentInformation);
 			} else if (isEqualTo("``", line, i, p1)) {
 				i = processCode("``", "``", line, i, p1, fragment, renderer);
 			} else if (c == '`') {
@@ -254,7 +257,7 @@ public class Paragraph {
 
 	int processHtmlTag(String line, int pos0, int pos1, Fragment fragment,
 			MarkdownRenderer renderer, DocumentInformation documentInformation) {
-		HtmlTagImpl tag = isHtmlTag(line, pos0, pos1);
+		HtmlTagImpl tag = HtmlUtil.isHtmlTag(line, pos0, pos1);
 		if (tag == null) {
 			// false alert... not an HTML tag
 			fragment.push("<");
@@ -287,7 +290,7 @@ public class Paragraph {
 		fragment.append(renderer.htmlTag(tag, s));
 
 		// hack to find the closing position
-		HtmlTagImpl tagClosing = isHtmlTag(line, pos2, pos1);
+		HtmlTagImpl tagClosing = HtmlUtil.isHtmlTag(line, pos2, pos1);
 		if (tagClosing == null) {
 			// trouble here ... should not happen
 			throw new RuntimeException("oops");
@@ -302,7 +305,7 @@ public class Paragraph {
 		for (int i = pos0; i < pos1; i++) {
 			char c = line.charAt(i);
 			if (c == '<') {
-				HtmlTagImpl tag2 = isHtmlTag(line, i, pos1);
+				HtmlTagImpl tag2 = HtmlUtil.isHtmlTag(line, i, pos1);
 				if (tag2 != null) {
 					if (tag.getTag().equals(tag2.getTag())) {
 						if (tag2.getType() == HtmlTag.TYPE_OPENING) {
@@ -321,148 +324,11 @@ public class Paragraph {
 		return -1;
 	}
 
-	HtmlTagImpl isHtmlTag(String line, int pos, int p1) {
-		StringBuilder rawData = new StringBuilder();
-		StringBuilder tagSb = new StringBuilder();
-		StringBuilder parSb = new StringBuilder();
-		StringBuilder valSb = new StringBuilder();
-
-		int type = HtmlTag.TYPE_OPENING;
-
-		HtmlTagImpl tag = null;
-		int state = 0;
-		rawData.append(line.charAt(pos)); // we already know we have an opening
-											// '<' as the first character
-		for (int i = pos + 1; i < p1 && state != 99 && state != 100; i++) {
-			char c = line.charAt(i);
-			rawData.append(c);
-
-			switch (state) {
-			case 0:
-				if (c == ' ') {
-					state = 0;
-				} else if (Character.isLetterOrDigit(c)) {
-					tagSb.append(c);
-					state = 1;
-				} else if (c == '/') {
-					if (type != HtmlTag.TYPE_OPENING) {
-						state = 99;
-					} else {
-						type = HtmlTag.TYPE_CLOSING;
-					}
-				} else {
-					state = 99;
-				}
-				break;
-			case 1:
-				// tag name
-				if (c == ' ') {
-					tag = new HtmlTagImpl(tagSb.toString());
-					state = 2;
-				} else if (Character.isLetterOrDigit(c)) {
-					tagSb.append(c);
-					state = 1;
-				} else if (c == '>') {
-					tag = new HtmlTagImpl(tagSb.toString());
-					state = 100;
-				} else {
-					state = 99;
-				}
-				break;
-			case 2:
-				if (c == ' ') {
-					state = 2;
-				} else if (c == '/') {
-					type = HtmlTag.TYPE_OPENING_CLOSING;
-					state = 8;
-				} else if (c == '>') {
-					state = 100;
-				} else if (Character.isLetterOrDigit(c)) {
-					parSb.append(c);
-					state = 3;
-				}
-				break;
-			case 3:
-				// attribute name
-				if (c == ' ') {
-					state = 4;
-				} else if (Character.isLetterOrDigit(c)) {
-					parSb.append(c);
-					state = 3;
-				} else if (c == '>') {
-					state = 100;
-				} else if (c == '=') {
-					state = 5;
-				} else {
-					state = 99;
-				}
-				break;
-			case 4:
-				if (c == ' ') {
-					state = 4;
-				} else if (c == '=') {
-					state = 5;
-				} else {
-					state = 99;
-				}
-				break;
-
-			case 5:
-				// attribute
-				if (c == ' ') {
-					state = 5;
-				} else if (c == '\'') {
-					state = 6;
-				} else if (c == '"') {
-					state = 7;
-				} else {
-					state = 99;
-				}
-				break;
-
-			case 6:
-				if (c == '\'') {
-					tag.addParameter(parSb.toString(), valSb.toString());
-					state = 2;
-				} else {
-					valSb.append(c);
-				}
-				break;
-
-			case 7:
-				if (c == '"') {
-					tag.addParameter(parSb.toString(), valSb.toString());
-					state = 2;
-				} else {
-					valSb.append(c);
-				}
-				break;
-
-			case 8:
-				if (c == ' ') {
-					state = 8;
-				} else if (c == '>') {
-					state = 100;
-				}
-				break;
-
-			}
-		}
-		if (state == 100) {
-			tag.setRawData(rawData.toString());
-			tag.setType(type);
-			return tag;
-		} else {
-			return null;
-		}
-	}
-
 	private final static Pattern _patternLinkInfo = Pattern
 			.compile("\\s*(\\S*)\\s*(\".*\")?\\s*");
 
-	private int processLink(String line, int pos0, int pos1,
-			Fragment fragment, MarkdownRenderer renderer,
-			DocumentInformation documentInformation) {
+	private int processLink(String line, int pos0, int pos1, Fragment fragment,
+			MarkdownRenderer renderer, DocumentInformation documentInformation) {
 		int pos2 = findMatching("[", "]", line, pos0 + 1, pos1);
 		if (pos2 < 0) {
 			fragment.append("[");
@@ -549,12 +415,10 @@ public class Paragraph {
 					String link = m.group(1);
 					String title = m.group(2);
 					if (title != null) {
-						title = title.substring(1, title.length() - 1);// we
-																		// remove
-																		// the
-																		// "s
+						// we remove the "s
+						title = title.substring(1, title.length() - 1);
 					}
-					fragment.append(renderer.link(link, title, linkText));
+					fragment.append(renderer.link(cleanupUrl(link), title, linkText));
 					return pos - 1; // we already are on the next char at the
 									// end of
 									// the FSM
@@ -608,6 +472,23 @@ public class Paragraph {
 		}
 		return linkId.toString().trim();
 	}
+	
+	// we remove <> around URL
+	private String cleanupUrl(String url) {
+		if (url == null) {
+			return "";
+		}
+		url = url.trim();
+		if (url.startsWith("<")) {
+			if (url.endsWith(">")) {
+				return url.substring(1, url.length() - 1);
+			} else {
+				return url;
+			}
+		} else {
+			return url;
+		}
+	}
 
 	private int findMatching(String opening, String closing, String line,
 			int pos0, int pos1) {
@@ -626,6 +507,24 @@ public class Paragraph {
 			}
 		}
 		return -1;
+	}
+
+	int processHtmlEntity(String line, int pos0, int pos1, Fragment fragment,
+			MarkdownRenderer renderer, DocumentInformation documentInformation) {
+		HtmlEntityImpl entity = HtmlUtil.isHtmlEntity(line, pos0, pos1);
+		if (entity == null) {
+			// false alert... not an HTML entity
+			fragment.push("&");
+			return pos0;
+		}
+
+		// we do have an entity
+		fragment.flush();
+
+		fragment.append(renderer.htmlEntity(entity));
+
+		return pos0 + entity.getRawData().length() - 1;
+
 	}
 
 	public static void main(String[] args) throws Exception {

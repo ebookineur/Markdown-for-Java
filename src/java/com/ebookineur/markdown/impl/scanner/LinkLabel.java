@@ -7,7 +7,7 @@ public class LinkLabel {
 
 	LinkLabel(String id, String url) {
 		_id = id;
-		_url = url;
+		_url = cleanupUrl(url);
 	}
 
 	LinkLabel(String id, String url, String title) {
@@ -30,4 +30,21 @@ public class LinkLabel {
 	void setTitle(String title) {
 		_title = title;
 	}
+
+	private String cleanupUrl(String url) {
+		if (url == null) {
+			return "";
+		}
+		url = url.trim();
+		if (url.startsWith("<")) {
+			if (url.endsWith(">")) {
+				return url.substring(1, url.length() - 1);
+			} else {
+				return url;
+			}
+		} else {
+			return url;
+		}
+	}
+
 }

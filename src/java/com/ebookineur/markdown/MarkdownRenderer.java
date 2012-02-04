@@ -3,6 +3,8 @@ package com.ebookineur.markdown;
 import java.util.Iterator;
 import java.util.List;
 
+import com.ebookineur.markdown.impl.scanner.HtmlEntityImpl;
+
 // from:
 // https://github.com/tanoku/redcarpet
 public interface MarkdownRenderer {
@@ -70,7 +72,18 @@ public interface MarkdownRenderer {
 		int getType();
 	}
 
+	public interface HtmlEntity {
+		int getNumber();
+
+		String getName();
+
+		String getRawData();
+
+	}
+
 	String htmlTag(HtmlTag tag, String text);
+
+	String htmlEntity(HtmlEntity entity);
 
 	String textFragment(String fragment);
 

@@ -2,9 +2,11 @@ package com.ebookineur.markdown.impl.scanner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+import com.ebookineur.markdown.MarkdownRenderer.HtmlEntity;
 import com.ebookineur.markdown.MarkdownRenderer.HtmlTag;
 
 public class TestHtmlUtil {
@@ -46,5 +48,23 @@ public class TestHtmlUtil {
 		assertEquals(HtmlTag.TYPE_OPENING, h.getType());
 		assertEquals("<b p='value'>", h.getRawData());
 
+	}
+	
+	@Test
+	public void test02() throws Exception {
+		HtmlEntity h = HtmlUtil.isHtmlEntity("@amp;", 0, 5);
+
+		assertNotNull(h);
+		assertEquals("amp", h.getName());
+		assertEquals(-1, h.getNumber());
+		assertEquals("@amp;", h.getRawData());
+		
+		h = HtmlUtil.isHtmlEntity("@#123;", 0, 6);
+
+		assertNotNull(h);
+		assertNull(h.getName());
+		assertEquals(123, h.getNumber());
+		assertEquals("@#123;", h.getRawData());
+		
 	}
 }

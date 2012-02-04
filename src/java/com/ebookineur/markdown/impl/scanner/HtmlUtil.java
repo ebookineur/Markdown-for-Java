@@ -143,4 +143,63 @@ public class HtmlUtil {
 		}
 	}
 
+	public static HtmlEntityImpl isHtmlEntity(String line, int pos, int p1) {
+		StringBuilder rawData = new StringBuilder();
+		StringBuilder number = new StringBuilder();
+		StringBuilder name = new StringBuilder();
+
+		int state = 0;
+		rawData.append(line.charAt(pos)); // we already know we have an opening
+											// '&' as the first character
+		for (int i = pos + 1; i < p1 && state != 99 && state != 100; i++) {
+			char c = line.charAt(i);
+			rawData.append(c);
+
+			switch (state) {
+			case 0:
+				if (c == '#') {
+					state = 1;
+				} else if (Character.isLetter(c)) {
+					name.append(c);
+					state = 5;
+				} else {
+					state = 99;
+				}
+				break;
+			case 1:
+				if (Character.isDigit(c)) {
+					number.append(c);
+				} else if (c == ';') {
+					state = 100;
+				} else {
+					state = 99;
+				}
+				break;
+			case 5:
+				if (Character.isLetter(c)) {
+					name.append(c);
+				} else if (c == ';') {
+					state = 100;
+				} else {
+					state = 99;
+				}
+				break;
+			}
+		}
+
+		if (state == 100) {
+			HtmlEntityImpl entity = new HtmlEntityImpl();
+			entity.setRawData(rawData.toString());
+			if (name.length() > 0) {
+				entity.setName(name.toString());
+			} else {
+				entity.setNumber(number.toString());
+			}
+			return entity;
+		} else {
+			return null;
+		}
+
+	}
+
 }
