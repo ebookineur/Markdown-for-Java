@@ -1,5 +1,9 @@
 package com.ebookineur.markdown.renderer;
 
+import com.ebookineur.markdown.MarkdownRenderer;
+import com.ebookineur.markdown.MarkdownRenderer.HtmlTag;
+import com.ebookineur.markdown.impl.scanner.HtmlUtil;
+
 public class RendererUtil {
 	public static String htmlEscape(String data) {
 		StringBuilder sb = new StringBuilder();
@@ -53,7 +57,51 @@ public class RendererUtil {
 			switch (state) {
 			case 0:
 				if (c == '<') {
-					state = 1;
+					HtmlTag htmlTag = HtmlUtil
+							.isHtmlTag(line, i, line.length());
+					if (htmlTag == null) {
+						sb.append(c);
+					} else if (htmlTag.getTag().equalsIgnoreCase(tag)) {
+						if (htmlTag.getType() == MarkdownRenderer.HtmlTag.TYPE_OPENING) {
+							if (level == 0) {
+								// we have our opening tag
+								// we don't output it
+								i += htmlTag.getRawData().length() - 1;
+								tagName.setLength(0);
+								state = 0;
+							} else {
+								// we have an embeded one, we need
+								// to output it
+								sb.append(htmlTag.getRawData());
+								i += htmlTag.getRawData().length() - 1;
+								state = 0;
+							}
+							level++;
+						} else if (htmlTag.getType() == MarkdownRenderer.HtmlTag.TYPE_CLOSING) {
+							level--;
+							if (level == 0) {
+								// this is it! we found our matching
+								// closing tag
+								// we append the rest of the string and
+								// we are done!
+								i += htmlTag.getRawData().length() - 1;
+								if (i < (line.length() - 1)) {
+									sb.append(line.substring(i + 1));
+								}
+								return sb.toString();
+							} else {
+								// closing an embeded one.. we
+								// output it
+								sb.append(htmlTag.getRawData());
+								i += htmlTag.getRawData().length() - 1;
+								state = 0;
+							}
+						}
+						
+					} else {
+						sb.append(htmlTag.getRawData());
+						i += htmlTag.getRawData().length() - 1;
+					}
 				} else {
 					sb.append(c);
 				}
@@ -159,6 +207,8 @@ public class RendererUtil {
 		x.t("<p>allo</p> blah blah", "p");
 		x.t("<p>allo<p>inside</p></p>", "p");
 		x.t("<p>allo<p>inside</p>xxx</p>", "p");
+		x.t("<p><a href=\"http://www.google.com\">http://www.google.com</a></p>",
+				"p");
 	}
 
 }

@@ -259,9 +259,9 @@ public class Paragraph {
 			MarkdownRenderer renderer, DocumentInformation documentInformation) {
 		HtmlTagImpl tag = HtmlUtil.isHtmlTag(line, pos0, pos1);
 		if (tag == null) {
-			// false alert... not an HTML tag
-			fragment.push("<");
-			return pos0;
+			// we may have an auto-link
+			return processAutoLink(line, pos0, pos1, fragment, renderer,
+					documentInformation);
 		}
 
 		if (tag.getType() == HtmlTag.TYPE_CLOSING) {
@@ -322,6 +322,30 @@ public class Paragraph {
 			}
 		}
 		return -1;
+	}
+
+	int processAutoLink(String line, int pos0, int pos1, Fragment fragment,
+			MarkdownRenderer renderer, DocumentInformation documentInformation) {
+		if (line.substring(pos0+1).trim().startsWith("http://")) {
+			StringBuilder link = new StringBuilder();
+			for (int i = pos0 + 1; i < pos1; i++) {
+				char c = line.charAt(i);
+				if (c == '>') {
+					fragment.append(renderer.autoLink(link.toString().trim()));
+					return i;
+				} else {
+					link.append(c);
+				}
+			}
+			// false alert... not an autolink
+			fragment.push("<");
+			return pos0;
+		} else {
+			// false alert... not an autolink
+			fragment.push("<");
+			return pos0;
+		}
+
 	}
 
 	private final static Pattern _patternLinkInfo = Pattern
@@ -418,7 +442,8 @@ public class Paragraph {
 						// we remove the "s
 						title = title.substring(1, title.length() - 1);
 					}
-					fragment.append(renderer.link(cleanupUrl(link), title, linkText));
+					fragment.append(renderer.link(cleanupUrl(link), title,
+							linkText));
 					return pos - 1; // we already are on the next char at the
 									// end of
 									// the FSM
@@ -472,7 +497,7 @@ public class Paragraph {
 		}
 		return linkId.toString().trim();
 	}
-	
+
 	// we remove <> around URL
 	private String cleanupUrl(String url) {
 		if (url == null) {

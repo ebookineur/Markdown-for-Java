@@ -31,6 +31,10 @@ public class BlockInlineHtml extends BlockElement {
 
 		String element = m.group(1).trim();
 
+		if ("http".equals(element)) {
+			return false;
+		}
+
 		return BlockInlineHtml.isBlockLevelElement(element);
 
 	}
@@ -106,4 +110,7 @@ public class BlockInlineHtml extends BlockElement {
 		_output.println(result);
 	}
 
+	public static void main(String[] args) {
+		BlockInlineHtml.isInlineHTML("<http://www.google.com>");
+	}
 }

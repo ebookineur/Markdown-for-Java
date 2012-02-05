@@ -52,6 +52,13 @@ public class TestHtmlUtil {
 	
 	@Test
 	public void test02() throws Exception {
+		HtmlTag h = HtmlUtil.isHtmlTag("<http://example.com/>", 0, 21);
+
+		assertNull(h);
+	}
+	
+	@Test
+	public void test03() throws Exception {
 		HtmlEntity h = HtmlUtil.isHtmlEntity("@amp;", 0, 5);
 
 		assertNotNull(h);

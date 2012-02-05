@@ -8,7 +8,7 @@ import com.ebookineur.markdown.MarkdownRenderer;
 
 public class BlockList extends BlockElement {
 	private final static String BULLETED_MARKERS = "*+-";
-	private final boolean _debug = false;
+	private final boolean _debug = true;
 
 	static boolean isList(String line) {
 		return checkIfList(line) > 0;

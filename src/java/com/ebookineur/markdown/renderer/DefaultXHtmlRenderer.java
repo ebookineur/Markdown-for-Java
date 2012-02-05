@@ -45,13 +45,19 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		if (title != null) {
 			sb.append(" title=\"");
 			// TODO: escape title
-			sb.append(RendererUtil.attributeEscape(RendererUtil.htmlEscape(title)));
+			sb.append(RendererUtil.attributeEscape(RendererUtil
+					.htmlEscape(title)));
 			sb.append("\"");
 		}
 		sb.append(">");
 		sb.append(RendererUtil.htmlEscape(content));
 		sb.append("</a>");
 		return sb.toString();
+	}
+
+	@Override
+	public String autoLink(String link) {
+		return link(link, null, link);
 	}
 
 	@Override
@@ -252,7 +258,7 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 
 	@Override
 	public String textFragment(String text) {
-		System.out.println("::" + text);
+		//System.out.println("::" + text);
 		if (_extensions.doEscapeInFragment()) {
 			return RendererUtil.htmlEscape(text);
 		} else {
@@ -260,61 +266,4 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 		}
 	}
 
-	private String escapeHtml(String data) {
-		StringBuilder sb = new StringBuilder();
-
-		int state = 0;
-		StringBuilder temp = new StringBuilder();
-
-		for (int i = 0; i < data.length(); i++) {
-			char c = data.charAt(i);
-
-			switch (state) {
-			case 0:
-				if (c == '&') {
-					temp.append(c);
-					state = 5;
-				} else if (c == '\'') {
-					sb.append("&#39;");
-				} else if (c == '<') {
-					temp.append(c);
-					state = 10;
-				}
-				break;
-			// management of & which can be &#xxx;
-			case 5:
-				if (c == '#') {
-					temp.append(c);
-					state = 6;
-				} else {
-					sb.append("@amp;");
-					sb.append(temp.substring(1));
-					temp.setLength(0);
-					state = 0;
-				}
-				break;
-
-			case 6:
-				if (Character.isDigit(c)) {
-					temp.append(c);
-				} else if (c == ';') {
-					sb.append(temp);
-					temp.setLength(0);
-					state = 0;
-				} else {
-					sb.append("@amp;");
-					sb.append(temp.substring(1));
-					temp.setLength(0);
-					state = 0;
-				}
-				break;
-
-			// managing <
-			case 10:
-				break;
-			}
-		}
-
-		return sb.toString();
-	}
 }

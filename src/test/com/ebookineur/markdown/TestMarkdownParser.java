@@ -20,11 +20,12 @@ import com.googlecode.htmlcompactor.HtmlCompactor;
 public class TestMarkdownParser {
 	@Test
 	public void test() throws Exception {
-		MarkdownExtensions extensions = MarkdownFactory.extensions();
-		testFile("tests/1.0.3/Amps and angle encoding.text", extensions);
+		@SuppressWarnings("unused")
+		MarkdownExtensions extensions1 = MarkdownFactory.extensions();
+		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
 	}
 
-	@Test
+	//@Test
 	public void testSimple() throws Exception {
 		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
 		testFile("tests/simple/test01.txt", extensions);
@@ -33,9 +34,10 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test04.txt", extensions);
 
 		testFile("tests/simple/test06.txt", extensions);
+		testFile("tests/simple/test07.txt", extensions);
 	}
 
-	@Test
+	//@Test
 	public void testBlock() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
 		testFile("tests/simple/test50.txt", extensions);
@@ -51,12 +53,13 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test64.txt", extensions);
 	}
 
-	@Test
+	//@Test
 	public void test103() throws Exception {
 		MarkdownExtensions extensions1 = MarkdownFactory.extensions();
 		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
 
 		testFile("tests/1.0.3/Amps and angle encoding.text", extensions1);
+		testFile("tests/1.0.3/Auto links.text", extensions2);
 		testFile("tests/1.0.3/Backslash escapes.text", extensions2);
 		testFile("tests/1.0.3/Blockquotes with code blocks.text", extensions2);
 		testFile("tests/1.0.3/Code Blocks.text", extensions2);
