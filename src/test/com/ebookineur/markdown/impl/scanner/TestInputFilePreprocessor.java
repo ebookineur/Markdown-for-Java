@@ -23,13 +23,13 @@ public class TestInputFilePreprocessor {
 
 		pre.read();
 
-		System.out.println("Nb labels:" + linkLabels.size());
-		for (LinkLabel linklabel : linkLabels.values()) {
-			System.out.println("id:" + linklabel.getId());
-			System.out.println("url:" + linklabel.getUrl());
-			System.out.println("title:" + linklabel.getTitle());
-			System.out.println("--");
-		}
+//		System.out.println("Nb labels:" + linkLabels.size());
+//		for (LinkLabel linklabel : linkLabels.values()) {
+//			System.out.println("id:" + linklabel.getId());
+//			System.out.println("url:" + linklabel.getUrl());
+//			System.out.println("title:" + linklabel.getTitle());
+//			System.out.println("--");
+//		}
 
 		assertNotNull(linkLabels);
 

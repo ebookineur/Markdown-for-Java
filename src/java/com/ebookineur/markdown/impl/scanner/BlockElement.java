@@ -17,8 +17,19 @@ public class BlockElement {
 		_lines.add(line);
 
 	}
-	
+
 	protected static boolean isBlankLine(String line) {
 		return line.trim().length() == 0;
+	}
+
+	protected void trimLastEmptyLine() {
+		if (_lines.size() == 0) {
+			return;
+		}
+		String lastLine = _lines.get(_lines.size() - 1);
+		if (isBlankLine(lastLine)) {
+			_lines.remove(_lines.size() - 1);
+		}
+
 	}
 }

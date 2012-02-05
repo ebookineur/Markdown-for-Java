@@ -8,14 +8,15 @@ import com.ebookineur.markdown.MarkdownRenderer;
 
 public class BlockList extends BlockElement {
 	private final static String BULLETED_MARKERS = "*+-";
-	private final boolean _debug = true;
+	private final boolean _debug = false;
 
 	static boolean isList(String line) {
 		return checkIfList(line) > 0;
 	}
 
 	static private int checkIfList(String line) {
-
+		// we trim as the list may be in an embedded list
+		line = line.trim();
 		if (line.length() < 2) {
 			return -1;
 		}
@@ -58,8 +59,8 @@ public class BlockList extends BlockElement {
 
 		while (state != 100) {
 			line = input.nextLine();
-			
-			// the horizontal rule 
+
+			// the horizontal rule
 			// can be interpreted as an item!
 			if ((line != null) && isHorizontalRule(line)) {
 				pushBacks.add(line);
@@ -132,13 +133,23 @@ public class BlockList extends BlockElement {
 
 	public void render(MarkdownRenderer renderer, DocumentInformation di)
 			throws IOException {
+		// we remove the last line if empty so that
+		// we don't mess up with the "withPara" or not
+		trimLastEmptyLine();
 		// the first line contains a list starting point
 		parseList(0, 0, _output, renderer);
 	}
-
+	
+	
+	// withPara is a mess to manage
+	// it set to true if empty lines separate items
+	// we don't want to compute that value to often
+	// as we want to focus on the first item to see wether
+	// we have to set it or not
+	// that's why we made an integer of it, so that it is computed only once
 	private int parseList(int index, int level, MdOutput output,
 			MarkdownRenderer renderer) throws IOException {
-		boolean withPara = false;
+		int withPara = -1;
 		String firstLine = _lines.get(index);
 
 		int currentIndentMax = (level + 1) * 4;
@@ -164,7 +175,7 @@ public class BlockList extends BlockElement {
 
 			int type0 = checkIfList(line.trim());
 			int indent = spaceIndent(line);
-			
+
 			// a blank line is part of the current group of items
 			if (isBlankLine(line)) {
 				items.add("");
@@ -177,22 +188,27 @@ public class BlockList extends BlockElement {
 				if ((indent >= currentIndentMin) && (indent < currentIndentMax)) {
 					// same list
 					boolean wp = trimEmptyLines(items);
-					if (!withPara) {
-						withPara = wp;
+					if (withPara < 0) {
+						withPara = wp ? 1 : 0;
 					}
 
 					if (items.size() > 0) {
 						itemOutput(level, output, renderer, type, items, null,
-								withPara);
+								withPara == 1);
 					}
 					items.add(line.substring(firstChar(line)));
 
 				} else if (indent < currentIndentMin) {
 					// we are back one indent
 					// so we are closing this list level
+					boolean wp = trimEmptyLines(items);
+					if (withPara < 0) {
+						withPara = wp ? 1 : 0;
+					}
+
 					if (items.size() > 0) {
 						itemOutput(level, output, renderer, type, items, null,
-								withPara);
+								withPara == 1);
 					}
 					output.println(renderer.block_list_end(type, level));
 					return i;
@@ -202,8 +218,13 @@ public class BlockList extends BlockElement {
 
 					int end = parseList(i, level + 1, o, renderer);
 
+					boolean wp = trimEmptyLines(items);
+					if (withPara < 0) {
+						withPara = wp ? 1 : 0;
+					}
+
 					itemOutput(level, output, renderer, type, items,
-							o.getLines(), withPara);
+							o.getLines(), withPara == 1);
 
 					i = end - 1; // there is a ++ at in the for loop and
 									// this line has to be processed
@@ -219,7 +240,7 @@ public class BlockList extends BlockElement {
 		}
 
 		if (items.size() > 0) {
-			itemOutput(level, output, renderer, type, items, null, withPara);
+			itemOutput(level, output, renderer, type, items, null, withPara == 1);
 		}
 
 		output.println(renderer.block_list_end(type, level));
@@ -365,7 +386,7 @@ public class BlockList extends BlockElement {
 		}
 		return line.substring(iNonBlank);
 	}
-	
+
 	static private boolean isHorizontalRule(String line) {
 		int count = 0;
 		char hr = '\0';
