@@ -31,6 +31,7 @@ public class BlockInlineHtml extends BlockElement {
 
 		String element = m.group(1).trim();
 
+		// hack here: we don't want to catch "autolink"s
 		if ("http".equals(element)) {
 			return false;
 		}

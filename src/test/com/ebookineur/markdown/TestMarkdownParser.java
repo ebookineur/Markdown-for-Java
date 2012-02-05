@@ -25,7 +25,7 @@ public class TestMarkdownParser {
 		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
 	}
 
-	//@Test
+	@Test
 	public void testSimple() throws Exception {
 		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
 		testFile("tests/simple/test01.txt", extensions);
@@ -35,9 +35,10 @@ public class TestMarkdownParser {
 
 		testFile("tests/simple/test06.txt", extensions);
 		testFile("tests/simple/test07.txt", extensions);
+		testFile("tests/simple/test08.txt", extensions);
 	}
 
-	//@Test
+	@Test
 	public void testBlock() throws Exception {
 		MarkdownExtensions extensions = MarkdownFactory.extensions();
 		testFile("tests/simple/test50.txt", extensions);
@@ -53,7 +54,7 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test64.txt", extensions);
 	}
 
-	//@Test
+	@Test
 	public void test103() throws Exception {
 		MarkdownExtensions extensions1 = MarkdownFactory.extensions();
 		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
@@ -77,10 +78,11 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Literal quotes in titles.text", extensions2);
 
 		testFile("tests/1.0.3/Nested blockquotes.text", extensions2);
-		// testFile("tests/1.0.3/Ordered and unordered lists.text", extensions);
+		testFile("tests/1.0.3/Ordered and unordered lists.text", extensions2);
 
 		testFile("tests/1.0.3/Strong and em together.text", extensions2);
 		testFile("tests/1.0.3/Tabs.text", extensions2);
+		testFile("tests/1.0.3/Tidyness.text", extensions2);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)

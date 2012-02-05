@@ -58,6 +58,15 @@ public class BlockList extends BlockElement {
 
 		while (state != 100) {
 			line = input.nextLine();
+			
+			// the horizontal rule 
+			// can be interpreted as an item!
+			if ((line != null) && isHorizontalRule(line)) {
+				pushBacks.add(line);
+				pushBacks(pushBacks, input);
+				state = 100;
+				continue;
+			}
 
 			switch (state) {
 			case 0:
@@ -356,4 +365,31 @@ public class BlockList extends BlockElement {
 		}
 		return line.substring(iNonBlank);
 	}
+	
+	static private boolean isHorizontalRule(String line) {
+		int count = 0;
+		char hr = '\0';
+
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+
+			if (hr != '\0') {
+				if ((c != hr) && (c != ' ') && (c != '\t')) {
+					return false;
+				}
+				if (c == hr) {
+					count++;
+				}
+			} else {
+				if ((c == '*') || (c == '-') || (c == '_')) {
+					hr = c;
+					count++;
+				} else if ((c != ' ') && (c != '\t')) {
+					return false;
+				}
+			}
+		}
+		return count >= 3;
+	}
+
 }
