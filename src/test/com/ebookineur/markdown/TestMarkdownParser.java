@@ -85,6 +85,12 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Tabs.text", extensions2);
 		testFile("tests/1.0.3/Tidyness.text", extensions2);
 	}
+	
+	@Test
+	public void testDocumentation() throws Exception {
+		MarkdownExtensions extensions = MarkdownFactory.extensions();
+		testFile("tests/1.0.3/Markdown Documentation - Basics.text", extensions);
+	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)
 			throws Exception {
