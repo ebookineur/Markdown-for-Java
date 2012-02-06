@@ -25,6 +25,10 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 
 	@Override
 	public String paragraph(String para) {
+		if (para.equals("list markers:")) {
+			new Throwable().printStackTrace();
+			System.out.println("*********");
+		}
 		return "<p>" + para + "</p>";
 	}
 

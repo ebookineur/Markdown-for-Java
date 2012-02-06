@@ -22,9 +22,14 @@ public class MdInputLinesImpl implements MdInput {
 	}
 
 	@Override
+	public int getLineno() {
+		return -1;
+	}
+
+	@Override
 	public void putBack(String line) {
-		//_lines.add(line);
-		
+		// _lines.add(line);
+
 		_index--;
 	}
 

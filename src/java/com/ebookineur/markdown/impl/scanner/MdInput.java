@@ -10,4 +10,6 @@ public interface MdInput {
 	public boolean eof();
 
 	public void close() throws IOException;
+	
+	int getLineno();
 }

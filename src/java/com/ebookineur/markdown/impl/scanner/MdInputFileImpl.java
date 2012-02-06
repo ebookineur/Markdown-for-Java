@@ -4,8 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 public class MdInputFileImpl implements MdInput {
 	private final Map<Integer, Integer> _linesMarkers;
@@ -13,7 +14,7 @@ public class MdInputFileImpl implements MdInput {
 	private int _lineno;
 	private boolean _eof;
 
-	private final Stack<String> _putBacks = new Stack<String>();
+	private final List<String> _putBacks = new ArrayList<String>();
 
 	MdInputFileImpl(File file, Map<Integer, Integer> linesMarkers)
 			throws IOException {
@@ -25,6 +26,11 @@ public class MdInputFileImpl implements MdInput {
 
 	}
 
+	@Override
+	public int getLineno() {
+		return _lineno;
+	}
+
 	public boolean eof() {
 		return _eof;
 	}
@@ -32,7 +38,9 @@ public class MdInputFileImpl implements MdInput {
 	public String nextLine() throws IOException {
 		while (true) {
 			if (_putBacks.size() > 0) {
-				return _putBacks.pop();
+				// we remove and return the bottom
+				// of the list first!
+				return _putBacks.remove(0);
 			}
 			if (_eof) {
 				return null;
@@ -82,7 +90,7 @@ public class MdInputFileImpl implements MdInput {
 	}
 
 	public void putBack(String line) {
-		_putBacks.push(line);
+		_putBacks.add(line);
 	}
 
 }
