@@ -7,6 +7,7 @@ import com.ebookineur.markdown.MarkdownExtensions;
 public class MarkdownExtensionsImpl implements MarkdownExtensions {
 	private boolean _withExtraEmptyLineAfterPara = true;
 	private boolean _doEscapeInFragment = true;
+	private boolean _debugMode = false;
 
 	public MarkdownExtensionsImpl(Map<String, String> properties) {
 		_withExtraEmptyLineAfterPara = p(properties,
@@ -35,5 +36,15 @@ public class MarkdownExtensionsImpl implements MarkdownExtensions {
 		}
 
 		return Boolean.parseBoolean(v);
+	}
+	
+	@Override
+	public void debugMode(boolean debugMode) {
+		_debugMode = debugMode;
+	}
+	
+	@Override
+	public boolean isInDebugMode() {
+		return _debugMode;
 	}
 }

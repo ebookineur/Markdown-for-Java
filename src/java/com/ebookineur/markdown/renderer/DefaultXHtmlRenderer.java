@@ -25,10 +25,6 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 
 	@Override
 	public String paragraph(String para) {
-		if (para.equals("list markers:")) {
-			new Throwable().printStackTrace();
-			System.out.println("*********");
-		}
 		return "<p>" + para + "</p>";
 	}
 
@@ -262,7 +258,9 @@ public class DefaultXHtmlRenderer implements MarkdownRenderer {
 
 	@Override
 	public String textFragment(String text) {
-		//System.out.println("::" + text);
+		if (_extensions.isInDebugMode()) {
+			System.out.println("::" + text);
+		}
 		if (_extensions.doEscapeInFragment()) {
 			return RendererUtil.htmlEscape(text);
 		} else {

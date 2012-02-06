@@ -23,7 +23,7 @@ public class TestMarkdownParser {
 		@SuppressWarnings("unused")
 		MarkdownExtensions extensions1 = MarkdownFactory.extensions();
 		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
-		
+
 	}
 
 	@Test
@@ -38,7 +38,8 @@ public class TestMarkdownParser {
 		testFile("tests/simple/test07.txt", extensions);
 		// we don't want to fix this one
 		// testFile("tests/simple/test08.txt", extensions);
-		//testFile("tests/simple/test09.txt", extensions);
+		testFile("tests/simple/test09.txt", extensions);
+		testFile("tests/simple/test10.txt", extensions);
 	}
 
 	@Test
@@ -87,11 +88,14 @@ public class TestMarkdownParser {
 		testFile("tests/1.0.3/Tabs.text", extensions2);
 		testFile("tests/1.0.3/Tidyness.text", extensions2);
 	}
-	
+
 	@Test
 	public void testDocumentation() throws Exception {
 		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
 		testFile("tests/1.0.3/Markdown Documentation - Basics.text", extensions);
+		extensions = MarkdownFactory.extensions();
+		extensions.debugMode(true);
+		testFile("tests/1.0.3/Markdown Documentation - Syntax.text", extensions);
 	}
 
 	private void testFile(String fileName, MarkdownExtensions extensions)
@@ -132,8 +136,10 @@ public class TestMarkdownParser {
 		String contentActual = readFile(new BufferedReader(new FileReader(
 				resultFile)));
 
-		assertEquals(new HtmlCompactor(contentExpected).compact(),
-				new HtmlCompactor(contentActual).compact());
+		assertEquals(
+				new HtmlCompactor(contentExpected).compact().replaceAll(
+						"&#39;", "'").replaceAll("&quot;","\""), new HtmlCompactor(contentActual)
+						.compact().replaceAll("&#39;", "'").replaceAll("&quot;","\""));
 
 	}
 

@@ -28,9 +28,6 @@ public class MdParser {
 				break;
 			}
 
-			if (line.equals("Ordered (numbered) lists use regular numbers, followed by periods, as")) {
-				System.out.println("***************!");
-			}
 			boolean isBlankLine = isBlankLine(line);
 
 			if (isBlankLine) {
