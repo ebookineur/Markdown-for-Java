@@ -15,7 +15,8 @@ public class MdInputFileImpl implements MdInput {
 
 	private final Stack<String> _putBacks = new Stack<String>();
 
-	MdInputFileImpl(File file, Map<Integer, Integer> linesMarkers) throws IOException {
+	MdInputFileImpl(File file, Map<Integer, Integer> linesMarkers)
+			throws IOException {
 		_linesMarkers = linesMarkers;
 
 		_br = new BufferedReader(new FileReader(file));
@@ -47,7 +48,17 @@ public class MdInputFileImpl implements MdInput {
 			if (lineToSkip(_lineno)) {
 				continue;
 			}
-			return line;
+
+			Integer nextType = _linesMarkers.get(_lineno + 1);
+			if (nextType == null) {
+				return line;
+			} else if (nextType == InputFilePreprocessor.LINE_HEADER_1) {
+				return "# " + line;
+			} else if (nextType == InputFilePreprocessor.LINE_HEADER_2) {
+				return "## " + line;
+			} else {
+				return line;
+			}
 		}
 	}
 
@@ -62,7 +73,9 @@ public class MdInputFileImpl implements MdInput {
 		}
 		int type = t.intValue();
 		if ((type == InputFilePreprocessor.LINE_WITHINKLABEL)
-				|| (type == InputFilePreprocessor.LINE_TOIGNORE)) {
+				|| (type == InputFilePreprocessor.LINE_TOIGNORE)
+				|| (type == InputFilePreprocessor.LINE_HEADER_1)
+				|| (type == InputFilePreprocessor.LINE_HEADER_2)) {
 			return true;
 		}
 		return false;

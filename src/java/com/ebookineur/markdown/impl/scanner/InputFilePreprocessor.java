@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 public class InputFilePreprocessor {
 	public final static int LINE_WITHINKLABEL = 1;
 	public final static int LINE_TOIGNORE = 2;
+	public final static int LINE_HEADER_1 = 3;
+	public final static int LINE_HEADER_2 = 4;
 	private final File _file;
 	private final Map<Integer, Integer> _linesMarkers;
 	private final Map<String, LinkLabel> _linkLabels;
@@ -41,6 +43,7 @@ public class InputFilePreprocessor {
 				lineno++;
 
 				if (checkIfLinkLabelDefinition(line, lineno)) {
+				} else if (checkIfSetextHeader(line, previousLine, lineno)) {
 				} else {
 				}
 				previousLine = line;
@@ -49,6 +52,37 @@ public class InputFilePreprocessor {
 		} finally {
 			br.close();
 		}
+	}
+
+	private boolean checkIfSetextHeader(String line, String previousLine,
+			int lineno) {
+		int nbEquals = 0;
+		int nbDashes = 0;
+
+		// if the previous lne is blank, we
+		// may have a horinzontal rule
+		if ((previousLine != null) && (previousLine.trim().length() == 0)) {
+			return false;
+		}
+
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+			if (c == '=') {
+				nbEquals++;
+			} else if (c == '-') {
+				nbDashes++;
+			} else {
+				return false;
+			}
+		}
+		if ((nbEquals > 0) && (nbDashes == 0)) {
+			_linesMarkers.put(lineno, LINE_HEADER_1);
+			;
+		} else if ((nbDashes > 0) && (nbEquals == 0)) {
+			_linesMarkers.put(lineno, LINE_HEADER_2);
+			;
+		}
+		return false;
 	}
 
 	private boolean checkIfLinkLabelDefinition(String line, int lineno) {
@@ -167,7 +201,7 @@ public class InputFilePreprocessor {
 					if (endTitle < 0) {
 						state = 99;
 					} else {
-						title.append(line.substring(i+1,endTitle));
+						title.append(line.substring(i + 1, endTitle));
 						i = endTitle;
 						state = 100;
 					}
@@ -177,13 +211,13 @@ public class InputFilePreprocessor {
 					state = 18;
 				}
 				break;
-//			case 16:
-//				if (c == '\"') {
-//					state = 100;
-//				} else {
-//					title.append(c);
-//				}
-//				break;
+			// case 16:
+			// if (c == '\"') {
+			// state = 100;
+			// } else {
+			// title.append(c);
+			// }
+			// break;
 			case 17:
 				if (c == '\'') {
 					state = 100;

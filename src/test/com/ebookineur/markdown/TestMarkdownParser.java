@@ -23,6 +23,7 @@ public class TestMarkdownParser {
 		@SuppressWarnings("unused")
 		MarkdownExtensions extensions1 = MarkdownFactory.extensions();
 		MarkdownExtensions extensions2 = extensionsNoEscapeInFragment();
+		
 	}
 
 	@Test
@@ -88,7 +89,7 @@ public class TestMarkdownParser {
 	
 	@Test
 	public void testDocumentation() throws Exception {
-		MarkdownExtensions extensions = MarkdownFactory.extensions();
+		MarkdownExtensions extensions = extensionsNoEscapeInFragment();
 		testFile("tests/1.0.3/Markdown Documentation - Basics.text", extensions);
 	}
 
